@@ -1,4 +1,5 @@
-use std::{env, fs, io};
+use crate::{lexer, parser};
+use std::{env, fs};
 
 struct Path {
     raw_path: String,
@@ -15,8 +16,39 @@ impl Path {
     }
 }
 
-fn analyzer_main() -> {
-    let jack_files = get_jack_files()?;
+pub fn analyzer_main() -> Result<(), &'static str> {
+    let jack_files = get_jack_files().expect("Failed to gather .jack files");
+
+    let parse_tree = match generate_xml(&jack_files) {
+        Ok(parse_tree) => parse_tree,
+        Err(e) => return Err(e),
+    };
+
+    println!("{parse_tree}");
+
+    Ok(())
+}
+
+fn generate_xml(jack_files: &Vec<String>) -> Result<String, &'static str> {
+    let mut parse_tree = String::new();
+    parse_tree.push_str("<tokens>\n");
+
+    for jack_file in jack_files {
+        let file_contents = fs::read_to_string(jack_file).expect(
+            &format!("Unable to open file \"{}\".", jack_file).to_string(),
+        );
+
+        let tokens = lexer::lex(file_contents)?;
+
+        // Parser::parse() returns a an XML parse tree for that specific stream
+        // of tokens.
+        let current_parse_tree = parser::parse(tokens)?;
+        parse_tree.push_str(&current_parse_tree);
+    }
+
+    parse_tree.push_str("</tokens>");
+
+    Ok(parse_tree)
 }
 
 fn get_jack_files() -> Result<Vec<String>, &'static str> {
@@ -45,5 +77,3 @@ fn get_jack_files() -> Result<Vec<String>, &'static str> {
 
     Ok(jack_files)
 }
-
-fn generate_xml() {}

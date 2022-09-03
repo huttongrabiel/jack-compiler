@@ -31,3 +31,13 @@ pub struct Token {
     pub line: u64,
     pub column: u16,
 }
+
+pub fn lex(file_contents: String) -> Result<Vec<Token>, &'static str> {
+    let tokens: Vec<Token> = Vec::new();
+
+    for byte in file_contents.as_bytes() {
+        println!("\"{}\"", byte);
+    }
+
+    Ok(tokens)
+}
