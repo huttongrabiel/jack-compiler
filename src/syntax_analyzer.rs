@@ -47,9 +47,9 @@ pub fn analyzer_main() -> Result<(), &'static str> {
 
 fn generate_xml(jack_files: &Vec<String>) -> Result<String, &'static str> {
     let mut parse_tree = String::new();
-    parse_tree.push_str("<tokens>\n");
 
     for jack_file in jack_files {
+        parse_tree.push_str("<tokens>\n");
         let file_contents = fs::read_to_string(jack_file).expect(
             &format!("Unable to open file \"{}\".", jack_file).to_string(),
         );
@@ -74,9 +74,10 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, &'static str> {
         // of tokens.
         let current_parse_tree = parser::parse(tokens)?;
         parse_tree.push_str(&current_parse_tree);
-    }
+        parse_tree.push_str("\n</tokens>");
 
-    parse_tree.push_str("</tokens>");
+        // TODO: Write to output file for each jack_file
+    }
 
     Ok(parse_tree)
 }
