@@ -1,6 +1,58 @@
 use std::fmt::Display;
 
 #[derive(Debug)]
+pub enum Token {
+    // Keywords
+    Class,
+    Constructor,
+    Function,
+    Method,
+    Field,
+    Static,
+    Var,
+    Int,
+    Char,
+    Boolean,
+    Void,
+    True,
+    False,
+    Null,
+    This,
+    Let,
+    Do,
+    If,
+    Else,
+    While,
+    Return,
+
+    // Symbols
+    OpenCurly,
+    CloseCurly,
+    OpenParen,
+    CloseParen,
+    OpenBracket,
+    CloseBracket,
+    Dot,
+    Comma,
+    Semicolon,
+    Plus,
+    Minus,
+    Asterik,
+    BackSlash,
+    Ampersand,
+    Pipe,
+    LessThan,
+    GreaterThan,
+    Equal,
+    Tilde,
+    DoubleQuote,
+    IntegerConstant,
+
+    StringConstant,
+    Identifier,
+}
+
+#[derive(Debug)]
 pub enum TokenType {
     KeyWord,
     Symbol,
@@ -24,19 +76,46 @@ impl Display for TokenType {
 }
 
 #[derive(Debug)]
-pub struct Token {
+pub struct TokenData {
     pub token_type: TokenType,
-    pub value: String,
+    pub value: Token,
     pub path: String,
     pub line: u64,
     pub column: u16,
 }
 
-pub fn lex(file_contents: String) -> Result<Vec<Token>, &'static str> {
-    let tokens: Vec<Token> = Vec::new();
+impl TokenData {
+    fn new(
+        token_type: TokenType,
+        value: Token,
+        path: String,
+        line: u64,
+        column: u16,
+    ) -> Self {
+        Self {
+            token_type,
+            value,
+            path,
+            line,
+            column,
+        }
+    }
+}
 
-    for byte in file_contents.as_bytes() {
-        println!("\"{}\"", byte);
+pub fn lex(file_contents: String) -> Result<Vec<TokenData>, &'static str> {
+    let mut tokens: Vec<TokenData> = Vec::new();
+
+    for byte in file.file_contents.as_bytes() {
+        let token = *byte as char;
+        // FIXME: Get actual token type based on the token value
+        tokens.push(TokenData::new(
+            TokenType::Symbol,
+            Token::If,
+            String::from("FIXME.txt"),
+            20000,
+            20000,
+        ));
+        println!("\"{}\"", token);
     }
 
     Ok(tokens)
