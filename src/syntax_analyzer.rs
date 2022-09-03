@@ -17,12 +17,9 @@ impl Path {
 }
 
 pub fn analyzer_main() -> Result<(), &'static str> {
-    let jack_files = get_jack_files().expect("Failed to gather .jack files");
+    let jack_files = get_jack_files()?;
 
-    let parse_tree = match generate_xml(&jack_files) {
-        Ok(parse_tree) => parse_tree,
-        Err(e) => return Err(e),
-    };
+    let parse_tree = generate_xml(&jack_files)?;
 
     println!("{parse_tree}");
 
@@ -52,8 +49,22 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, &'static str> {
 }
 
 fn get_jack_files() -> Result<Vec<String>, &'static str> {
-    let mut path = Path::new(String::new());
-    path.raw_path = env::args().into_iter().next().unwrap();
+    let mut args = env::args().into_iter();
+    args.next();
+
+    let path = match args.next() {
+        Some(path) => path.trim().to_string(),
+        None => {
+            return Err("Provide a .jack file or directory of .jack files.")
+        }
+    };
+
+    if fs::metadata(&path).is_err() {
+        // FIXME: Print the filename.
+        return Err("File does not exist.");
+    }
+
+    let path = Path::new(path);
 
     let mut jack_files: Vec<String> = Vec::new();
 
