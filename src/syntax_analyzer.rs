@@ -1,6 +1,8 @@
 use crate::{lexer, parser};
 use std::{env, fs};
 
+pub const DEBUG: bool = true;
+
 struct Path {
     raw_path: String,
     is_dir: bool,
@@ -54,6 +56,11 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, &'static str> {
 
         let path = std::path::Path::new(&jack_file);
         let file_name = path.file_name().unwrap().to_str().unwrap();
+
+        if DEBUG {
+            eprintln!("File path: {:?}", path);
+            eprintln!("File name: {}", file_name);
+        }
 
         let file_data = FileData::new(
             path.to_str().unwrap().to_owned(),
