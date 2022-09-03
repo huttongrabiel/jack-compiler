@@ -16,6 +16,23 @@ impl Path {
     }
 }
 
+#[derive(Debug)]
+pub struct FileData {
+    pub file_name: String,
+    pub path: String,
+    pub file_contents: String,
+}
+
+impl FileData {
+    fn new(file_name: String, path: String, file_contents: String) -> Self {
+        Self {
+            file_name,
+            path,
+            file_contents,
+        }
+    }
+}
+
 pub fn analyzer_main() -> Result<(), &'static str> {
     let jack_files = get_jack_files()?;
 
@@ -35,7 +52,16 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, &'static str> {
             &format!("Unable to open file \"{}\".", jack_file).to_string(),
         );
 
-        let tokens = lexer::lex(file_contents)?;
+        let path = std::path::Path::new(&jack_file);
+        let file_name = path.file_name().unwrap().to_str().unwrap();
+
+        let file_data = FileData::new(
+            path.to_str().unwrap().to_owned(),
+            file_name.to_string(),
+            file_contents,
+        );
+
+        let tokens = lexer::lex(file_data)?;
 
         // Parser::parse() returns a an XML parse tree for that specific stream
         // of tokens.

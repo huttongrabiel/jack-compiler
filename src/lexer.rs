@@ -1,3 +1,4 @@
+use crate::syntax_analyzer::FileData;
 use std::fmt::Display;
 
 #[derive(Debug)]
@@ -102,7 +103,7 @@ impl TokenData {
     }
 }
 
-pub fn lex(file_contents: String) -> Result<Vec<TokenData>, &'static str> {
+pub fn lex(file: FileData) -> Result<Vec<TokenData>, &'static str> {
     let mut tokens: Vec<TokenData> = Vec::new();
 
     for byte in file.file_contents.as_bytes() {
