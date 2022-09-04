@@ -119,6 +119,24 @@ impl Lexer {
             let token = match &file_contents[self.index] {
                 // FIXME: Figure out how to check for keywords
                 b'{' => Token::OpenCurly,
+                b'}' => Token::CloseCurly,
+                b'(' => Token::OpenParen,
+                b')' => Token::CloseParen,
+                b'[' => Token::OpenBracket,
+                b']' => Token::CloseBracket,
+                b'.' => Token::Dot,
+                b',' => Token::Comma,
+                b';' => Token::Semicolon,
+                b'+' => Token::Plus,
+                b'-' => Token::Minus,
+                b'*' => Token::Asterik,
+                b'/' => Token::BackSlash,
+                b'&' => Token::Ampersand,
+                b'|' => Token::Pipe,
+                b'<' => Token::LessThan,
+                b'>' => Token::GreaterThan,
+                b'=' => Token::Equal,
+                b'~' => Token::Tilde,
                 _ => return Err("Invalid token"),
             };
 
