@@ -125,7 +125,7 @@ impl Lexer {
             tokens.push(TokenData::new(
                 // FIXME: Get actual token type based on the token value
                 TokenType::Symbol,
-                Token::If,
+                token,
                 self.file.path,
                 // FIXME: Get actual line and columns
                 20000,
