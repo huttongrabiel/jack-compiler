@@ -60,6 +60,7 @@ pub enum TokenType {
     Identifier,
     IntVal,
     StringVal,
+    Garbage,
 }
 
 #[derive(Debug)]
