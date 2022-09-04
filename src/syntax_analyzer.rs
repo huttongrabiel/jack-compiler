@@ -111,7 +111,8 @@ fn get_jack_files() -> Result<Vec<String>, &'static str> {
         jack_files = fs::read_dir(path.raw_path)
             .unwrap()
             .filter(|dir_entry| {
-                dir_entry.as_ref().unwrap().path().ends_with(".jack")
+                dir_entry.as_ref().unwrap().path().extension().unwrap()
+                    == "jack"
             })
             .map(|dir_entry| {
                 dir_entry.unwrap().path().to_str().unwrap().to_owned()
