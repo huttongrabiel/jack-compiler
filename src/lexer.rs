@@ -144,13 +144,11 @@ impl Lexer {
             }
 
             tokens.push(TokenData::new(
-                // FIXME: Get actual token type based on the token value
-                TokenType::Symbol,
+                token_type,
                 token,
-                self.file.path,
-                // FIXME: Get actual line and columns
-                20000,
-                20000,
+                self.file.path.clone(),
+                self.file.line,
+                self.file.column,
             ));
 
             self.index += 1;
