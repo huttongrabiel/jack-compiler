@@ -107,7 +107,13 @@ impl Lexer {
         let file_contents = self.file.file_contents.as_bytes();
 
         while !self.eof() {
-            let token = match &file_contents[self.index] {
+            let current_byte = file_contents[self.index];
+
+            if current_byte.is_ascii_whitespace() {
+                // TODO: Increment file line count when current_byte is newline
+                self.index += 1;
+                continue;
+            }
                 // FIXME: Figure out how to check for keywords
                 b'{' => Token::OpenCurly,
                 b'}' => Token::CloseCurly,
