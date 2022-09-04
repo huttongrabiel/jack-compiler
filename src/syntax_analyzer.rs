@@ -23,6 +23,8 @@ pub struct FileData {
     pub file_name: String,
     pub path: String,
     pub file_contents: String,
+    pub line: u64,
+    pub column: u16,
 }
 
 impl FileData {
@@ -31,6 +33,8 @@ impl FileData {
             file_name,
             path,
             file_contents,
+            line: 0,
+            column: 0,
         }
     }
 }
