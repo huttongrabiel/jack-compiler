@@ -114,27 +114,37 @@ impl Lexer {
                 self.index += 1;
                 continue;
             }
-                // FIXME: Figure out how to check for keywords
-                b'{' => Token::OpenCurly,
-                b'}' => Token::CloseCurly,
-                b'(' => Token::OpenParen,
-                b')' => Token::CloseParen,
-                b'[' => Token::OpenBracket,
-                b']' => Token::CloseBracket,
-                b'.' => Token::Dot,
-                b',' => Token::Comma,
-                b';' => Token::Semicolon,
-                b'+' => Token::Plus,
-                b'-' => Token::Minus,
-                b'*' => Token::Asterik,
-                b'/' => Token::BackSlash,
-                b'&' => Token::Ampersand,
-                b'|' => Token::Pipe,
-                b'<' => Token::LessThan,
-                b'>' => Token::GreaterThan,
-                b'=' => Token::Equal,
-                b'~' => Token::Tilde,
-                _ => return Err("Invalid token"),
+
+            let (token, token_type) = match &file_contents[self.index] {
+                b'{' => (Token::OpenCurly, TokenType::Symbol),
+                b'}' => (Token::CloseCurly, TokenType::Symbol),
+                b'(' => (Token::OpenParen, TokenType::Symbol),
+                b')' => (Token::CloseParen, TokenType::Symbol),
+                b'[' => (Token::OpenBracket, TokenType::Symbol),
+                b']' => (Token::CloseBracket, TokenType::Symbol),
+                b'.' => (Token::Dot, TokenType::Symbol),
+                b',' => (Token::Comma, TokenType::Symbol),
+                b';' => (Token::Semicolon, TokenType::Symbol),
+                b'+' => (Token::Plus, TokenType::Symbol),
+                b'-' => (Token::Minus, TokenType::Symbol),
+                b'*' => (Token::Asterik, TokenType::Symbol),
+                b'/' => (Token::BackSlash, TokenType::Symbol),
+                b'&' => (Token::Ampersand, TokenType::Symbol),
+                b'|' => (Token::Pipe, TokenType::Symbol),
+                b'<' => (Token::LessThan, TokenType::Symbol),
+                b'>' => (Token::GreaterThan, TokenType::Symbol),
+                b'=' => (Token::Equal, TokenType::Symbol),
+                b'~' => (Token::Tilde, TokenType::Symbol),
+                b'"' => self.lex_string_constant(),
+                _ => {
+                    if file_contents[self.index].is_ascii_alphabetic() {
+                        self.lex_keyword_or_identifier()
+                    } else if file_contents[self.index].is_ascii_digit() {
+                        self.lex_integer_constant()
+                    } else {
+                        return Err("Invalid token encountered");
+                    }
+                }
             };
 
             if !DEBUG && token == Token::Garbage {
@@ -167,5 +177,24 @@ impl Lexer {
 
     fn eof(&self) -> bool {
         self.index >= self.file.file_contents.as_bytes().len()
+    }
+
+    fn lex_keyword_or_identifier(&self) -> (Token, TokenType) {
+        let start = self.index;
+        let input = self.file.file_contents.as_bytes();
+
+        if input[self.index].is_ascii_digit() {
+            self.lex_integer_constant();
+        }
+
+        (Token::Garbage, TokenType::Garbage)
+    }
+
+    fn lex_integer_constant(&self) -> (Token, TokenType) {
+        todo!()
+    }
+
+    fn lex_string_constant(&self) -> (Token, TokenType) {
+        todo!()
     }
 }
