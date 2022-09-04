@@ -115,7 +115,7 @@ impl Lexer {
 
         let file_contents = self.file.file_contents.as_bytes();
 
-        while self.eof() {
+        while !self.eof() {
             let token = match &file_contents[self.index] {
                 // FIXME: Figure out how to check for keywords
                 b'{' => Token::OpenCurly,
