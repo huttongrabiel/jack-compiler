@@ -51,6 +51,7 @@ pub enum Token {
 
     StringConstant,
     Identifier,
+    Garbage,
 }
 
 #[derive(Debug)]
