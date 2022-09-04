@@ -1,6 +1,6 @@
-use crate::syntax_analyzer::FileData;
+use crate::syntax_analyzer::{FileData, DEBUG};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Token {
     // Keywords
     Class,
@@ -129,6 +129,12 @@ impl Lexer {
                 b'~' => Token::Tilde,
                 _ => return Err("Invalid token"),
             };
+
+            if !DEBUG && token == Token::Garbage {
+                // TODO: Return error information (file, line, and column) of
+                // the garbage token.
+                return Err("Invalid token encountered");
+            }
 
             tokens.push(TokenData::new(
                 // FIXME: Get actual token type based on the token value
