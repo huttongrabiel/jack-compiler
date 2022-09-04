@@ -144,5 +144,8 @@ impl Lexer {
     fn peek_k(&self, k: usize) -> u8 {
         self.file.file_contents.as_bytes()[self.index + k]
     }
+
+    fn eof(&self) -> bool {
+        self.index > self.file.file_contents.as_bytes().len()
     }
 }
