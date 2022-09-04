@@ -103,21 +103,37 @@ impl TokenData {
     }
 }
 
-pub fn lex(file: FileData) -> Result<Vec<TokenData>, &'static str> {
-    let mut tokens: Vec<TokenData> = Vec::new();
+#[derive(Debug)]
+pub struct Lexer {
+    file: FileData,
+    index: usize,
+}
 
-    for byte in file.file_contents.as_bytes() {
-        let token = *byte as char;
-        // FIXME: Get actual token type based on the token value
-        tokens.push(TokenData::new(
-            TokenType::Symbol,
-            Token::If,
-            String::from("FIXME.txt"),
-            20000,
-            20000,
-        ));
-        println!("\"{}\"", token);
+impl Lexer {
+    pub fn lex(&self) -> Result<Vec<TokenData>, &'static str> {
+        let mut tokens: Vec<TokenData> = Vec::new();
+
+        let file_contents = self.file.file_contents.as_bytes();
+
+        while self.eof() {
+            let token = match &file_contents[self.index] {
+                // FIXME: Figure out how to check for keywords
+                b'{' => Token::OpenCurly,
+                _ => return Err("Invalid token"),
+            };
+
+            tokens.push(TokenData::new(
+                // FIXME: Get actual token type based on the token value
+                TokenType::Symbol,
+                Token::If,
+                String::from("FIXME.txt"),
+                20000,
+                20000,
+            ));
+
+            self.index += 1;
+        }
+
+        Ok(tokens)
     }
-
-    Ok(tokens)
 }
