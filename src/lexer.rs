@@ -165,6 +165,6 @@ impl Lexer {
     }
 
     fn eof(&self) -> bool {
-        self.index > self.file.file_contents.as_bytes().len()
+        self.index >= self.file.file_contents.as_bytes().len()
     }
 }
