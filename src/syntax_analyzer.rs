@@ -1,4 +1,4 @@
-use crate::{lexer, parser};
+use crate::{lexer::Lexer, parser};
 use std::{env, fs};
 
 pub const DEBUG: bool = true;
@@ -68,7 +68,8 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, &'static str> {
             file_contents,
         );
 
-        let tokens = lexer::lex(file_data)?;
+        let mut lexer = Lexer::new(file_data);
+        let tokens = lexer.lex()?;
 
         // Parser::parse() returns a an XML parse tree for that specific stream
         // of tokens.

@@ -111,7 +111,11 @@ pub struct Lexer {
 }
 
 impl Lexer {
-    pub fn lex(&self) -> Result<Vec<TokenData>, &'static str> {
+    pub fn new(file: FileData) -> Self {
+        Self { file, index: 0 }
+    }
+
+    pub fn lex(&mut self) -> Result<Vec<TokenData>, &'static str> {
         let mut tokens: Vec<TokenData> = Vec::new();
 
         let file_contents = self.file.file_contents.as_bytes();
