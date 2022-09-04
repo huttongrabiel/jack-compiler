@@ -1,8 +1,9 @@
+use crate::error::{ErrorType, JackError};
 use crate::lexer::TokenData;
 use std::io;
 use std::io::Write;
 
-pub fn parse(tokens: Vec<TokenData>) -> Result<String, &'static str> {
+pub fn parse(tokens: Vec<TokenData>) -> Result<String, JackError> {
     let parse_tree = String::new();
 
     for token in tokens {

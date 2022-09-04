@@ -1,4 +1,7 @@
-use crate::syntax_analyzer::{FileData, DEBUG};
+use crate::{
+    error::{ErrorType, JackError},
+    syntax_analyzer::{FileData, DEBUG},
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Token {
@@ -101,7 +104,7 @@ impl Lexer {
         Self { file, index: 0 }
     }
 
-    pub fn lex(&mut self) -> Result<Vec<TokenData>, &'static str> {
+    pub fn lex(&mut self) -> Result<Vec<TokenData>, JackError> {
         let mut tokens: Vec<TokenData> = Vec::new();
 
         let file_contents = self.file.file_contents.as_bytes();
@@ -142,15 +145,25 @@ impl Lexer {
                     } else if file_contents[self.index].is_ascii_digit() {
                         self.lex_integer_constant()
                     } else {
-                        return Err("Invalid token encountered");
+                        return Err(JackError::new(
+                            ErrorType::GarbageToken,
+                            "Invalid token encountered",
+                            Some(self.file.path.clone()),
+                            Some(self.file.line),
+                            Some(self.file.column),
+                        ));
                     }
                 }
             };
 
             if !DEBUG && token == Token::Garbage {
-                // TODO: Return error information (file, line, and column) of
-                // the garbage token.
-                return Err("Invalid token encountered");
+                return Err(JackError::new(
+                    ErrorType::GarbageToken,
+                    "Invalid token encountered",
+                    Some(self.file.path.clone()),
+                    Some(self.file.line),
+                    Some(self.file.column),
+                ));
             }
 
             tokens.push(TokenData::new(

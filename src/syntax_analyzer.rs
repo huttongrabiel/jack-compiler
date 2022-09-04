@@ -1,4 +1,8 @@
-use crate::{lexer::Lexer, parser};
+use crate::{
+    error::{ErrorType, JackError},
+    lexer::Lexer,
+    parser,
+};
 use std::{env, fs};
 
 pub const DEBUG: bool = true;
@@ -39,7 +43,7 @@ impl FileData {
     }
 }
 
-pub fn analyzer_main() -> Result<(), &'static str> {
+pub fn analyzer_main() -> Result<(), JackError> {
     let jack_files = get_jack_files()?;
 
     let parse_tree = generate_xml(&jack_files)?;
@@ -49,7 +53,7 @@ pub fn analyzer_main() -> Result<(), &'static str> {
     Ok(())
 }
 
-fn generate_xml(jack_files: &Vec<String>) -> Result<String, &'static str> {
+fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
     let mut parse_tree = String::new();
 
     for jack_file in jack_files {
@@ -87,20 +91,32 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, &'static str> {
     Ok(parse_tree)
 }
 
-fn get_jack_files() -> Result<Vec<String>, &'static str> {
+fn get_jack_files() -> Result<Vec<String>, JackError> {
     let mut args = env::args().into_iter();
     args.next();
 
     let path = match args.next() {
         Some(path) => path.trim().to_string(),
         None => {
-            return Err("Provide a .jack file or directory of .jack files.")
+            return Err(JackError::new(
+                ErrorType::IOError,
+                "Provide a .jack file or directory of .jack files.",
+                None,
+                None,
+                None,
+            ))
         }
     };
 
     if fs::metadata(&path).is_err() {
         // FIXME: Print the filename.
-        return Err("File does not exist.");
+        return Err(JackError::new(
+            ErrorType::IOError,
+            "File does not exist.",
+            Some(path),
+            None,
+            None,
+        ));
     }
 
     let path = Path::new(path);
@@ -118,12 +134,16 @@ fn get_jack_files() -> Result<Vec<String>, &'static str> {
                 dir_entry.unwrap().path().to_str().unwrap().to_owned()
             })
             .collect();
+    } else if path.raw_path.ends_with(".jack") {
+        jack_files.push(path.raw_path);
     } else {
-        if path.raw_path.ends_with(".jack") {
-            jack_files.push(path.raw_path);
-        } else {
-            return Err("File provided has incorrect file type.");
-        }
+        return Err(JackError::new(
+            ErrorType::IOError,
+            "File provided has incorrect file type.",
+            Some(path.raw_path),
+            None,
+            None,
+        ));
     }
 
     Ok(jack_files)
