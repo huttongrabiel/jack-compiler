@@ -126,7 +126,8 @@ impl Lexer {
                 // FIXME: Get actual token type based on the token value
                 TokenType::Symbol,
                 Token::If,
-                String::from("FIXME.txt"),
+                self.file.path,
+                // FIXME: Get actual line and columns
                 20000,
                 20000,
             ));
