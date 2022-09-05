@@ -139,7 +139,7 @@ impl Lexer {
                 b'*' => (Token::Asterik, TokenType::Symbol),
                 b'/' => {
                     self.lex_comment()?;
-                    (Token::BackSlash, TokenType::Symbol)
+                    continue;
                 }
                 b'&' => (Token::Ampersand, TokenType::Symbol),
                 b'|' => (Token::Pipe, TokenType::Symbol),
