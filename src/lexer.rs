@@ -122,6 +122,8 @@ impl Lexer {
                 continue;
             }
 
+            let start_index = self.index;
+
             let (token, token_type) = match current_byte {
                 b'{' => (Token::OpenCurly, TokenType::Symbol),
                 b'}' => (Token::CloseCurly, TokenType::Symbol),
@@ -181,8 +183,10 @@ impl Lexer {
                 self.file.column,
             ));
 
-            self.index += 1;
-            self.file.column += 1;
+            if start_index == self.index {
+                self.index += 1;
+                self.file.column += 1;
+            }
         }
 
         Ok(tokens)
