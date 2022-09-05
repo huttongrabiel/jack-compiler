@@ -115,10 +115,12 @@ impl Lexer {
             if current_byte.is_ascii_whitespace() {
                 self.index += 1;
                 self.file.column += 1;
+
                 if is_new_line(current_byte) {
-                    self.file.column = 0;
+                    self.file.column = 1;
                     self.file.line += 1;
                 }
+
                 continue;
             }
 
