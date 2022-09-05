@@ -113,8 +113,12 @@ impl Lexer {
             let current_byte = file_contents[self.index];
 
             if current_byte.is_ascii_whitespace() {
-                // TODO: Increment file line count when current_byte is newline
                 self.index += 1;
+                self.file.column += 1;
+                if is_new_line(current_byte) {
+                    self.file.column = 0;
+                    self.file.line += 1;
+                }
                 continue;
             }
 
@@ -175,6 +179,7 @@ impl Lexer {
             ));
 
             self.index += 1;
+            self.file.column += 1;
         }
 
         Ok(tokens)
@@ -210,4 +215,8 @@ impl Lexer {
     fn lex_string_constant(&self) -> (Token, TokenType) {
         todo!()
     }
+}
+
+fn is_new_line(byte: u8) -> bool {
+    byte == b'\r' || byte == b'\n'
 }
