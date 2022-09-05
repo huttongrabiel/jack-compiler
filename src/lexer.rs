@@ -220,3 +220,21 @@ impl Lexer {
 fn is_new_line(byte: u8) -> bool {
     byte == b'\r' || byte == b'\n'
 }
+
+#[cfg(test)]
+mod lexer_tests {
+    use super::*;
+
+    #[test]
+    fn test_is_new_line() {
+        let valid_bytes = vec![b'\r', b'\n'];
+        for byte in valid_bytes {
+            assert!(is_new_line(byte));
+        }
+
+        let invalid_bytes = "ab83[}0817dHIjas\t";
+        for byte in invalid_bytes.as_bytes() {
+            assert!(!is_new_line(*byte));
+        }
+    }
+}
