@@ -135,7 +135,10 @@ impl Lexer {
                 b'+' => (Token::Plus, TokenType::Symbol),
                 b'-' => (Token::Minus, TokenType::Symbol),
                 b'*' => (Token::Asterik, TokenType::Symbol),
-                b'/' => (Token::BackSlash, TokenType::Symbol),
+                b'/' => {
+                    self.lex_comment()?;
+                    (Token::BackSlash, TokenType::Symbol)
+                }
                 b'&' => (Token::Ampersand, TokenType::Symbol),
                 b'|' => (Token::Pipe, TokenType::Symbol),
                 b'<' => (Token::LessThan, TokenType::Symbol),
@@ -197,7 +200,7 @@ impl Lexer {
         self.index >= self.file.file_contents.as_bytes().len()
     }
 
-    fn lex_keyword_or_identifier(&self) -> (Token, TokenType) {
+    fn lex_keyword_or_identifier(&mut self) -> (Token, TokenType) {
         let start = self.index;
         let input = self.file.file_contents.as_bytes();
 
@@ -208,12 +211,38 @@ impl Lexer {
         (Token::Garbage, TokenType::Garbage)
     }
 
+    fn lex_comment(&mut self) -> Result<(), JackError> {
+        match self.peek() {
+            b'/' => self.advance_to_next_line(),
+            _ => {
+                return Err(JackError::new(
+                    ErrorType::GarbageToken,
+                    "Single backslash encountered. Did you mean '//'?",
+                    Some(self.file.path.clone()),
+                    Some(self.file.line),
+                    Some(self.file.column),
+                ))
+            }
+        }
+        Ok(())
+    }
+
     fn lex_integer_constant(&self) -> (Token, TokenType) {
         todo!()
     }
 
     fn lex_string_constant(&self) -> (Token, TokenType) {
         todo!()
+    }
+
+    fn advance_to_next_line(&mut self) {
+        while !is_new_line(self.file.file_contents.as_bytes()[self.index]) {
+            self.index += 1;
+        }
+        // Advance to start of next line.
+        self.index += 1;
+        self.file.column = 1;
+        self.file.line += 1;
     }
 }
 
