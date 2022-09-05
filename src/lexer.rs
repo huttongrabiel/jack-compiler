@@ -227,8 +227,34 @@ impl Lexer {
     }
 
     fn lex_comment(&mut self) -> Result<(), JackError> {
+        if self.peek_behind() == b'*' {
+            self.index += 1;
+            return Ok(());
+        }
+
         match self.peek() {
             b'/' => self.advance_to_next_line(),
+            b'*' => {
+                let start_line = self.file.line;
+                let start_column = self.file.column;
+
+                // Move from '/' to '*' in '/*'.
+                self.advance_to_next(b'*');
+                // Find the '*' in '*/'.
+                while !self.eof() && self.peek() != b'/' {
+                    self.advance_to_next(b'*');
+                }
+
+                if self.eof() {
+                    return Err(JackError::new(
+                        ErrorType::GarbageToken,
+                        "Unclosed multi-line comment.",
+                        Some(self.file.path.clone()),
+                        Some(start_line),
+                        Some(start_column),
+                    ));
+                }
+            }
             _ => {
                 return Err(JackError::new(
                     ErrorType::GarbageToken,
@@ -236,7 +262,7 @@ impl Lexer {
                     Some(self.file.path.clone()),
                     Some(self.file.line),
                     Some(self.file.column),
-                ))
+                ));
             }
         }
         Ok(())
