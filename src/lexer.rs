@@ -250,6 +250,29 @@ impl Lexer {
         todo!()
     }
 
+    fn advance_to_next(&mut self, byte: u8) {
+        let file_bytes = self.file.file_contents.as_bytes();
+
+        // Don't match the byte that we are already on. Skip it and find next.
+        if file_bytes[self.index] == byte {
+            if is_new_line(file_bytes[self.index]) {
+                self.file.column = 1;
+                self.file.line += 1;
+            }
+            self.file.column += 1;
+            self.index += 1;
+        }
+
+        while !self.eof() && file_bytes[self.index] != byte {
+            if is_new_line(file_bytes[self.index]) {
+                self.file.column = 1;
+                self.file.line += 1;
+            }
+            self.file.column += 1;
+            self.index += 1;
+        }
+    }
+
     fn advance_to_next_line(&mut self) {
         while !is_new_line(self.file.file_contents.as_bytes()[self.index]) {
             self.index += 1;
