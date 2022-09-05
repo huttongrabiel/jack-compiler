@@ -58,9 +58,11 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
 
     for jack_file in jack_files {
         parse_tree.push_str("<tokens>\n");
-        let file_contents = fs::read_to_string(jack_file).expect(
-            &format!("Unable to open file \"{}\".", jack_file).to_string(),
-        );
+
+        let file_contents =
+            fs::read_to_string(jack_file).unwrap_or_else(|_| {
+                panic!("{}", format!("Unable to open file \"{}\".", jack_file))
+            });
 
         let path = std::path::Path::new(&jack_file);
         let file_name = path.file_name().unwrap().to_str().unwrap();
@@ -92,7 +94,7 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
 }
 
 fn get_jack_files() -> Result<Vec<String>, JackError> {
-    let mut args = env::args().into_iter();
+    let mut args = env::args();
     args.next();
 
     let path = match args.next() {
