@@ -107,10 +107,8 @@ impl Lexer {
     pub fn lex(&mut self) -> Result<Vec<TokenData>, JackError> {
         let mut tokens: Vec<TokenData> = Vec::new();
 
-        let file_contents = self.file.file_contents.as_bytes();
-
         while !self.eof() {
-            let current_byte = file_contents[self.index];
+            let current_byte = self.file.file_contents.as_bytes()[self.index];
 
             if current_byte.is_ascii_whitespace() {
                 self.index += 1;
@@ -124,7 +122,7 @@ impl Lexer {
                 continue;
             }
 
-            let (token, token_type) = match &file_contents[self.index] {
+            let (token, token_type) = match current_byte {
                 b'{' => (Token::OpenCurly, TokenType::Symbol),
                 b'}' => (Token::CloseCurly, TokenType::Symbol),
                 b'(' => (Token::OpenParen, TokenType::Symbol),
@@ -146,9 +144,9 @@ impl Lexer {
                 b'~' => (Token::Tilde, TokenType::Symbol),
                 b'"' => self.lex_string_constant(),
                 _ => {
-                    if file_contents[self.index].is_ascii_alphabetic() {
+                    if current_byte.is_ascii_alphabetic() {
                         self.lex_keyword_or_identifier()
-                    } else if file_contents[self.index].is_ascii_digit() {
+                    } else if current_byte.is_ascii_digit() {
                         self.lex_integer_constant()
                     } else {
                         return Err(JackError::new(
