@@ -210,11 +210,17 @@ impl Lexer {
     }
 
     fn lex_keyword_or_identifier(&mut self) -> (Token, TokenType) {
-        let start = self.index;
         let input = self.file.file_contents.as_bytes();
 
         if input[self.index].is_ascii_digit() {
             self.lex_integer_constant();
+        }
+
+        let mut builder = String::new();
+        while !input[self.index].is_ascii_whitespace() {
+            builder.push(input[self.index] as char);
+            self.file.column += 1;
+            self.index += 1;
         }
 
         (Token::Garbage, TokenType::Garbage)
