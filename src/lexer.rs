@@ -196,6 +196,11 @@ impl Lexer {
         self.file.file_contents.as_bytes()[self.index + 1]
     }
 
+    fn peek_behind(&self) -> u8 {
+        assert!(self.index > 0);
+        self.file.file_contents.as_bytes()[self.index - 1]
+    }
+
     fn peek_k(&self, k: usize) -> u8 {
         self.file.file_contents.as_bytes()[self.index + k]
     }
