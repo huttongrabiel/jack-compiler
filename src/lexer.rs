@@ -151,7 +151,12 @@ impl Lexer {
                 b'>' => (Token::GreaterThan, TokenType::Symbol),
                 b'=' => (Token::Equal, TokenType::Symbol),
                 b'~' => (Token::Tilde, TokenType::Symbol),
-                b'"' => self.lex_string_constant()?,
+                b'"' => {
+                    let (tok, tok_type, tok_str) =
+                        self.lex_string_constant()?;
+                    token_str = Some(tok_str);
+                    (tok, tok_type)
+                }
                 _ => {
                     if current_byte.is_ascii_alphabetic() {
                         let (tok, tok_type, tok_str) =
@@ -336,8 +341,57 @@ impl Lexer {
         Ok((Token::IntegerConstant, TokenType::IntVal, integer_builder))
     }
 
-    fn lex_string_constant(&self) -> Result<(Token, TokenType), JackError> {
-        todo!()
+    // TODO: FUTURE - Support multi line strings.
+    fn lex_string_constant(
+        &mut self,
+    ) -> Result<(Token, TokenType, String), JackError> {
+        let input = self.file.file_contents.as_bytes();
+
+        // Store start of String to point in the case of an error.
+        let start_column = self.file.column;
+        let start_line = self.file.line;
+
+        // We should currently be on the opening '"' so go to next token.
+        self.index += 1;
+        self.file.column += 1;
+
+        let mut string_builder = String::new();
+        while !self.eof() && input[self.index] != b'"' {
+            if is_new_line(input[self.index]) {
+                self.file.line += 1;
+                self.file.column = 1;
+            }
+            string_builder.push(input[self.index] as char);
+            self.index += 1;
+            self.file.column += 1;
+        }
+
+        if self.eof() {
+            return Err(JackError::new(
+                ErrorType::UnclosedQuotation,
+                "Non-terminated string. You forgot a '\"' somewhere.",
+                Some(self.file.path.clone()),
+                Some(start_line),
+                Some(start_column),
+            ));
+        } else if self.file.line != start_line {
+            return Err(JackError::new(
+                ErrorType::GeneralError,
+                "Multi-line strings are not supported at this time.",
+                Some(self.file.path.clone()),
+                Some(start_line),
+                Some(start_column),
+            ));
+        }
+
+        // Advance past the closing '"', otherwise it appears as the start of
+        // another StringConstant.
+        if input[self.index] == b'"' {
+            self.index += 1;
+            self.file.column += 1;
+        }
+
+        Ok((Token::StringConstant, TokenType::StringVal, string_builder))
     }
 
     fn advance_to_next(&mut self, byte: u8) {
