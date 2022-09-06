@@ -70,6 +70,7 @@ pub enum TokenType {
 pub struct TokenData {
     pub token_type: TokenType,
     pub value: Token,
+    pub token_str: Option<String>,
     pub path: String,
     pub line: u64,
     pub column: u16,
@@ -79,6 +80,7 @@ impl TokenData {
     fn new(
         token_type: TokenType,
         value: Token,
+        token_str: Option<String>,
         path: String,
         line: u64,
         column: u16,
@@ -86,6 +88,7 @@ impl TokenData {
         Self {
             token_type,
             value,
+            token_str,
             path,
             line,
             column,
@@ -124,6 +127,7 @@ impl Lexer {
 
             let start_index = self.index;
 
+            let mut token_str: Option<String> = None;
             let (token, token_type) = match current_byte {
                 b'{' => (Token::OpenCurly, TokenType::Symbol),
                 b'}' => (Token::CloseCurly, TokenType::Symbol),
@@ -150,7 +154,10 @@ impl Lexer {
                 b'"' => self.lex_string_constant(),
                 _ => {
                     if current_byte.is_ascii_alphabetic() {
-                        self.lex_keyword_or_identifier()
+                        let (tok, tok_type, tok_str) =
+                            self.lex_keyword_or_identifier();
+                        token_str = tok_str;
+                        (tok, tok_type)
                     } else if current_byte.is_ascii_digit() {
                         self.lex_integer_constant()
                     } else {
@@ -178,6 +185,7 @@ impl Lexer {
             tokens.push(TokenData::new(
                 token_type,
                 token,
+                token_str,
                 self.file.path.clone(),
                 self.file.line,
                 self.file.column,

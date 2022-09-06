@@ -9,7 +9,10 @@ pub fn parse(tokens: Vec<TokenData>) -> Result<String, JackError> {
     for token in tokens {
         print!("<{:?}>", token.token_type);
         io::stdout().flush().unwrap();
-        print!("{:?}", token.value);
+        print!(
+            "{}",
+            token.token_str.unwrap_or(format!("{:?}", token.value))
+        );
         io::stdout().flush().unwrap();
         println!("</{:?}>", token.token_type);
     }
