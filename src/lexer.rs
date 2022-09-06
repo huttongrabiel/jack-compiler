@@ -224,6 +224,7 @@ impl Lexer {
             self.lex_integer_constant();
         }
 
+        // FIXME: Do not include semicolons in the builder.
         let mut builder = String::new();
         while !input[self.index].is_ascii_whitespace() {
             builder.push(input[self.index] as char);
