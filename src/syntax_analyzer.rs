@@ -85,9 +85,39 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
         // of tokens.
         let current_parse_tree = parser::parse(tokens)?;
         parse_tree.push_str(&current_parse_tree);
-        parse_tree.push_str("\n</tokens>");
+        parse_tree.push_str("</tokens>");
 
-        // TODO: Write to output file for each jack_file
+        let mut ppath = match path.parent() {
+            Some(ppath) => ppath.to_str().unwrap(),
+            None => ".",
+        };
+
+        if ppath.is_empty() {
+            ppath = ".";
+        }
+
+        if DEBUG {
+            eprintln!(
+                "Built path: {}",
+                &format!(
+                    "{}/{}.xml",
+                    ppath,
+                    file_name.trim_end_matches(".jack"),
+                )
+            )
+        }
+
+        fs::write(
+            std::path::Path::new(&format!(
+                "{}/{}.xml",
+                ppath,
+                file_name.trim_end_matches(".jack")
+            )),
+            parse_tree.clone(),
+        )
+        .expect("Failed to write to output file");
+
+        parse_tree.clear();
     }
 
     Ok(parse_tree)
