@@ -11,6 +11,7 @@ pub enum ErrorType {
     UnclosedBracket,
     UnclosedQuotation,
     IOError,
+    InvalidInteger,
     GeneralError,
 }
 
@@ -23,6 +24,7 @@ impl Display for ErrorType {
             ErrorType::UnclosedBracket => write!(f, "UnclosedBracket"),
             ErrorType::UnclosedQuotation => write!(f, "UnclosedQuotation"),
             ErrorType::IOError => write!(f, "IOError"),
+            ErrorType::InvalidInteger => write!(f, "InvalidInteger"),
             ErrorType::GeneralError => write!(f, "GeneralError"),
         }
     }
