@@ -58,7 +58,7 @@ pub enum Token {
 
 #[derive(Debug)]
 pub enum TokenType {
-    KeyWord,
+    Keyword,
     Symbol,
     Identifier,
     IntVal,
@@ -217,7 +217,9 @@ impl Lexer {
         self.index >= self.file.file_contents.as_bytes().len()
     }
 
-    fn lex_keyword_or_identifier(&mut self) -> (Token, TokenType) {
+    fn lex_keyword_or_identifier(
+        &mut self,
+    ) -> (Token, TokenType, Option<String>) {
         let input = self.file.file_contents.as_bytes();
 
         if input[self.index].is_ascii_digit() {
@@ -232,7 +234,32 @@ impl Lexer {
             self.index += 1;
         }
 
-        (Token::Garbage, TokenType::Garbage)
+        match builder.as_str() {
+            "class" => (Token::Class, TokenType::Keyword, Some(builder)),
+            "constructor" => {
+                (Token::Constructor, TokenType::Keyword, Some(builder))
+            }
+            "function" => (Token::Function, TokenType::Keyword, Some(builder)),
+            "method" => (Token::Method, TokenType::Keyword, Some(builder)),
+            "field" => (Token::Field, TokenType::Keyword, Some(builder)),
+            "static" => (Token::Static, TokenType::Keyword, Some(builder)),
+            "var" => (Token::Var, TokenType::Keyword, Some(builder)),
+            "int" => (Token::Int, TokenType::Keyword, Some(builder)),
+            "char" => (Token::Char, TokenType::Keyword, Some(builder)),
+            "boolean" => (Token::Boolean, TokenType::Keyword, Some(builder)),
+            "void" => (Token::Void, TokenType::Keyword, Some(builder)),
+            "true" => (Token::True, TokenType::Keyword, Some(builder)),
+            "false" => (Token::False, TokenType::Keyword, Some(builder)),
+            "null" => (Token::Null, TokenType::Keyword, Some(builder)),
+            "this" => (Token::This, TokenType::Keyword, Some(builder)),
+            "let" => (Token::Let, TokenType::Keyword, Some(builder)),
+            "do" => (Token::Do, TokenType::Keyword, Some(builder)),
+            "if" => (Token::If, TokenType::Keyword, Some(builder)),
+            "else" => (Token::Else, TokenType::Keyword, Some(builder)),
+            "while" => (Token::While, TokenType::Keyword, Some(builder)),
+            "return" => (Token::Return, TokenType::Keyword, Some(builder)),
+            _ => (Token::Identifier, TokenType::Identifier, Some(builder)),
+        }
     }
 
     fn lex_comment(&mut self) -> Result<(), JackError> {
