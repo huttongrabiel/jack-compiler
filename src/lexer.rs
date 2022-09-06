@@ -151,7 +151,7 @@ impl Lexer {
                 b'>' => (Token::GreaterThan, TokenType::Symbol),
                 b'=' => (Token::Equal, TokenType::Symbol),
                 b'~' => (Token::Tilde, TokenType::Symbol),
-                b'"' => self.lex_string_constant(),
+                b'"' => self.lex_string_constant()?,
                 _ => {
                     if current_byte.is_ascii_alphabetic() {
                         let (tok, tok_type, tok_str) =
@@ -336,7 +336,7 @@ impl Lexer {
         Ok((Token::IntegerConstant, TokenType::IntVal, integer_builder))
     }
 
-    fn lex_string_constant(&self) -> (Token, TokenType) {
+    fn lex_string_constant(&self) -> Result<(Token, TokenType), JackError> {
         todo!()
     }
 
