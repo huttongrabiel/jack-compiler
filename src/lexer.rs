@@ -159,7 +159,10 @@ impl Lexer {
                         token_str = tok_str;
                         (tok, tok_type)
                     } else if current_byte.is_ascii_digit() {
-                        self.lex_integer_constant()
+                        let (tok, tok_type, int_str) =
+                            self.lex_integer_constant()?;
+                        token_str = Some(int_str);
+                        (tok, tok_type)
                     } else {
                         return Err(JackError::new(
                             ErrorType::GarbageToken,
@@ -221,10 +224,6 @@ impl Lexer {
         &mut self,
     ) -> (Token, TokenType, Option<String>) {
         let input = self.file.file_contents.as_bytes();
-
-        if input[self.index].is_ascii_digit() {
-            self.lex_integer_constant();
-        }
 
         let mut builder = String::new();
         while !input[self.index].is_ascii_whitespace()
@@ -305,8 +304,36 @@ impl Lexer {
         Ok(())
     }
 
-    fn lex_integer_constant(&self) -> (Token, TokenType) {
-        todo!()
+    fn lex_integer_constant(
+        &mut self,
+    ) -> Result<(Token, TokenType, String), JackError> {
+        let input = self.file.file_contents.as_bytes();
+
+        let mut integer_builder = String::new();
+        while !input[self.index].is_ascii_whitespace()
+            && !is_symbol(input[self.index])
+        {
+            integer_builder.push(input[self.index] as char);
+            self.index += 1;
+            self.file.column += 1;
+        }
+
+        for (i, ch) in integer_builder.as_bytes().iter().enumerate() {
+            if !ch.is_ascii_digit() {
+                return Err(JackError::new(
+                    ErrorType::InvalidInteger,
+                    "Invalid integer constant.",
+                    Some(self.file.path.clone()),
+                    Some(self.file.line),
+                    Some(
+                        self.file.column
+                            - (integer_builder.len() as u16 - i as u16),
+                    ),
+                ));
+            }
+        }
+
+        Ok((Token::IntegerConstant, TokenType::IntVal, integer_builder))
     }
 
     fn lex_string_constant(&self) -> (Token, TokenType) {
