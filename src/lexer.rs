@@ -226,9 +226,10 @@ impl Lexer {
             self.lex_integer_constant();
         }
 
-        // FIXME: Do not include semicolons in the builder.
         let mut builder = String::new();
-        while !input[self.index].is_ascii_whitespace() {
+        while !input[self.index].is_ascii_whitespace()
+            && !is_symbol(input[self.index])
+        {
             builder.push(input[self.index] as char);
             self.file.column += 1;
             self.index += 1;
@@ -344,6 +345,19 @@ impl Lexer {
         self.file.column = 1;
         self.file.line += 1;
     }
+}
+
+fn is_symbol(byte: u8) -> bool {
+    let symbols = vec![
+        b'{', b'}', b'(', b')', b'[', b']', b'.', b',', b';', b'+', b'-', b'*',
+        b'/', b'&', b'|', b'<', b'>', b'=', b'~', b'"',
+    ];
+
+    if symbols.contains(&byte) {
+        return true;
+    }
+
+    false
 }
 
 fn is_new_line(byte: u8) -> bool {
