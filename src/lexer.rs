@@ -142,8 +142,12 @@ impl Lexer {
                 b'-' => (Token::Minus, TokenType::Symbol),
                 b'*' => (Token::Asterik, TokenType::Symbol),
                 b'/' => {
-                    self.lex_comment()?;
-                    continue;
+                    let next_tok = self.peek();
+                    if next_tok == b'/' || next_tok == b'*' {
+                        self.lex_comment()?;
+                        continue;
+                    }
+                    (Token::BackSlash, TokenType::Symbol)
                 }
                 b'&' => (Token::Ampersand, TokenType::Symbol),
                 b'|' => (Token::Pipe, TokenType::Symbol),
@@ -264,11 +268,6 @@ impl Lexer {
     }
 
     fn lex_comment(&mut self) -> Result<(), JackError> {
-        if self.index > 0 && self.peek_behind() == b'*' {
-            self.index += 1;
-            return Ok(());
-        }
-
         match self.peek() {
             b'/' => self.advance_to_next_line(),
             b'*' => {
@@ -291,6 +290,10 @@ impl Lexer {
                         Some(start_column),
                     ));
                 }
+
+                // Advance past the '*/' multi-line closer.
+                self.index += 2;
+                self.file.column += 2;
             }
             _ => {
                 return Err(JackError::new(
