@@ -96,8 +96,10 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
             ppath = ".";
         }
 
-        if DEBUG {
-            ppath = "/home/hutton/fun/jack_compiler/testjack/";
+        if DEBUG && path.is_file() {
+            ppath = ".";
+        } else if DEBUG && path.is_dir() {
+            ppath = "/home/hutton/fun/jack_compiler/jacktest";
         }
 
         if DEBUG {
