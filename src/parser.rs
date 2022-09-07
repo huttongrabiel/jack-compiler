@@ -1,19 +1,35 @@
 use crate::error::{ErrorType, JackError};
 use crate::lexer::TokenData;
 
-pub fn parse(tokens: Vec<TokenData>) -> Result<String, JackError> {
-    let mut parse_tree = String::new();
+pub struct Parser {
+    pub tokens: Vec<TokenData>,
+    pub token_index: u64,
+}
 
-    for token in tokens {
-        parse_tree.push_str(format!("<{:?}>", token.token_type).as_str());
-        parse_tree.push_str(
-            token
-                .token_str
-                .unwrap_or(format!("{:?}", token.value))
-                .as_str(),
-        );
-        parse_tree.push_str(format!("</{:?}>\n", token.token_type).as_str());
+impl Parser {
+    pub fn new(tokens: Vec<TokenData>) -> Self {
+        Self {
+            tokens,
+            token_index: 0,
+        }
     }
 
-    Ok(parse_tree)
+    pub fn parse(&mut self) -> Result<String, JackError> {
+        let mut parse_tree = String::new();
+
+        for token in &self.tokens {
+            parse_tree.push_str(format!("<{:?}>", token.token_type).as_str());
+            parse_tree.push_str(
+                token
+                    .token_str
+                    .as_ref()
+                    .unwrap_or(&format!("{:?}", token.value))
+                    .as_str(),
+            );
+            parse_tree
+                .push_str(format!("</{:?}>\n", token.token_type).as_str());
+        }
+
+        Ok(parse_tree)
+    }
 }

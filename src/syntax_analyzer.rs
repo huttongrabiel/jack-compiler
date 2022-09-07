@@ -1,7 +1,7 @@
 use crate::{
     error::{ErrorType, JackError},
     lexer::Lexer,
-    parser,
+    parser::Parser,
 };
 use std::{env, fs};
 
@@ -83,7 +83,8 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
 
         // Parser::parse() returns a an XML parse tree for that specific stream
         // of tokens.
-        let current_parse_tree = parser::parse(tokens)?;
+        let mut parser = Parser::new(tokens);
+        let current_parse_tree = parser.parse()?;
         parse_tree.push_str(&current_parse_tree);
         parse_tree.push_str("</tokens>");
 
