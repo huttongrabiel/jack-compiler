@@ -264,7 +264,7 @@ impl Lexer {
     }
 
     fn lex_comment(&mut self) -> Result<(), JackError> {
-        if self.peek_behind() == b'*' {
+        if self.index > 0 && self.peek_behind() == b'*' {
             self.index += 1;
             return Ok(());
         }
