@@ -1,5 +1,58 @@
 use crate::error::{ErrorType, JackError};
-use crate::lexer::TokenData;
+use crate::lexer::{Token, TokenData, TokenType};
+
+pub enum ParseTag {
+    // 'class' className '{' ClassVarDec* SubroutineDec* '}'
+    Class,
+    // ('static' | 'field') Type VarName (',' VarName)* ';'
+    ClassVarDec,
+    // 'int' | 'char' | 'boolean' | ClassName
+    Type,
+    // ('constructor' | 'function' | 'method') ('void' | Type) SubroutineName
+    // '(' ParameterList ')' SubroutineBody
+    SubroutineDec,
+    // ((Type VarName)(',' type VarName)*)?
+    ParameterList,
+    // '{' VarDec* statements '}'
+    SubroutineBody,
+    // 'var' Type VarName (',', VarName)* ';'
+    VarDec,
+    // Identifier
+    ClassName,
+    // Identifier
+    SubroutineName,
+    // Identifier
+    VarName,
+    // statement*
+    Statements,
+    // 'let' VarName ('[' Expression ']')? '=' Expression ';'
+    LetStatement,
+    // 'if' '(' Expression ')' '{' Statements '}' ('else' '{' Statements '}')?
+    IfStatement,
+    // 'while' '(' Expression ')' '{' Statements '}'
+    WhileStatement,
+    // do SubroutineCall ';'
+    DoStatement,
+    // 'return' expression? ';' (REMEMBER, EVERY function returns in Jack)
+    ReturnStatement,
+    // term (op term*)
+    Expression,
+    // IntegerConstant | StringConstant | KeywordConstant | VarName |
+    // VarName '[' ExpressionList ']' | SubroutineCall | '(' expression ')' |
+    // UnaryOp
+    Term,
+    // SubroutineName '(' ExpressionList ')' | (ClassName | VarName) '.'
+    // SubroutineName '(' ExpressionList ')'
+    SubroutineCall,
+    // (expression (',' expression)*)?
+    ExpressionList,
+    // '+' | '-' | '*' | '/' | '&' | '|' | '<' | '>' | '='
+    Op,
+    // '-' | '~' // '~' is NOT operator idk why they didn't use '!'
+    UnaryOp,
+    // 'true' | 'false' | 'null' | 'this'
+    KeywordConstant,
+}
 
 pub struct Parser {
     pub tokens: Vec<TokenData>,
