@@ -141,7 +141,6 @@ fn get_jack_files() -> Result<Vec<String>, JackError> {
     };
 
     if fs::metadata(&path).is_err() {
-        // FIXME: Print the filename.
         return Err(JackError::new(
             ErrorType::IOError,
             "File does not exist.",
