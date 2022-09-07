@@ -71,6 +71,83 @@ impl Parser {
         let mut parse_tree = String::new();
 
         for token in &self.tokens {
+            match token.token_type {
+                TokenType::Keyword => match token.value {
+                    Token::Class => {}
+                    Token::Constructor => {}
+                    Token::Function => {}
+                    Token::Method => {}
+                    Token::Field => {}
+                    Token::Static => {}
+                    Token::Var => {}
+                    Token::Int => {}
+                    Token::Char => {}
+                    Token::Boolean => {}
+                    Token::Void => {}
+                    Token::True => {}
+                    Token::False => {}
+                    Token::Null => {}
+                    Token::This => {}
+                    Token::Let => {}
+                    Token::Do => {}
+                    Token::If => {}
+                    Token::Else => {}
+                    Token::While => {}
+                    Token::Return => {}
+                    _ => panic!(
+                        "LEXER IS NOT CORRECT! HAS NON KEYWORD WRAPPED IN\
+                            KEYWORD TYPE"
+                    ),
+                },
+                // I think for the most part these will get skipped because they
+                // will be advanced past in the parse... functions.
+                TokenType::Symbol => {
+                    match token.value {
+                        Token::OpenCurly => {}
+                        Token::CloseCurly => {}
+                        Token::OpenParen => {}
+                        Token::CloseParen => {}
+                        Token::OpenBracket => {}
+                        Token::CloseBracket => {}
+                        Token::Dot => {}
+                        Token::Comma => {}
+                        Token::Semicolon => {}
+                        Token::Plus => {}
+                        Token::Minus => {}
+                        Token::Asterik => {}
+                        Token::BackSlash => {}
+                        Token::Ampersand => {}
+                        Token::Pipe => {}
+                        Token::LessThan => {}
+                        Token::GreaterThan => {}
+                        Token::Equal => {}
+                        Token::Tilde => {}
+                        Token::DoubleQuote => {}
+                        Token::IntegerConstant => {}
+                        _ => return Err(JackError::new(
+                            ErrorType::GeneralError,
+                            "LEXER IS NOT CORRECT! HAS NON SYMBOL WRAPPED IN\
+                            SYMBOL TYPE",
+                            None,
+                            None,
+                            None,
+                        )),
+                    }
+                }
+                TokenType::Identifier => {}
+                TokenType::IntConst => {}
+                TokenType::StringConst => {}
+                TokenType::Garbage => {
+                    return Err(JackError::new(
+                        ErrorType::GarbageToken,
+                        "Unknown token encountered.",
+                        Some(token.path.clone()),
+                        Some(token.line),
+                        Some(token.column),
+                    ))
+                }
+            };
+
             parse_tree.push_str(format!("<{:?}>", token.token_type).as_str());
             parse_tree.push_str(
                 token
