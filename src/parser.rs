@@ -5,7 +5,7 @@ pub fn parse(tokens: Vec<TokenData>) -> Result<String, JackError> {
     let mut parse_tree = String::new();
 
     for token in tokens {
-        parse_tree.push_str(format!("\t<{:?}>", token.token_type).as_str());
+        parse_tree.push_str(format!("<{:?}>", token.token_type).as_str());
         parse_tree.push_str(
             token
                 .token_str
