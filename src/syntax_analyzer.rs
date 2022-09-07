@@ -97,6 +97,10 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
         }
 
         if DEBUG {
+            ppath = "/home/hutton/fun/jack_compiler/testjack/";
+        }
+
+        if DEBUG {
             eprintln!(
                 "Built path: {}",
                 &format!(
