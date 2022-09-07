@@ -61,8 +61,8 @@ pub enum TokenType {
     Keyword,
     Symbol,
     Identifier,
-    IntVal,
-    StringVal,
+    IntConst,
+    StringConst,
     Garbage,
 }
 
@@ -337,7 +337,7 @@ impl Lexer {
             }
         }
 
-        Ok((Token::IntegerConstant, TokenType::IntVal, integer_builder))
+        Ok((Token::IntegerConstant, TokenType::IntConst, integer_builder))
     }
 
     // TODO: FUTURE - Support multi line strings.
@@ -390,7 +390,11 @@ impl Lexer {
             self.file.column += 1;
         }
 
-        Ok((Token::StringConstant, TokenType::StringVal, string_builder))
+        Ok((
+            Token::StringConstant,
+            TokenType::StringConst,
+            string_builder,
+        ))
     }
 
     fn advance_to_next(&mut self, byte: u8) {
