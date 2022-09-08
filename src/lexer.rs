@@ -3,7 +3,7 @@ use crate::{
     syntax_analyzer::{FileData, DEBUG},
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Token {
     // Keywords
     Class,
@@ -56,7 +56,7 @@ pub enum Token {
     Garbage,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum TokenType {
     Keyword,
     Symbol,
@@ -66,7 +66,7 @@ pub enum TokenType {
     Garbage,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TokenData {
     pub token_type: TokenType,
     pub token: Token,
