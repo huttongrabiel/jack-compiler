@@ -68,7 +68,7 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Result<String, JackError> {
-        if self.tokens[0].value != Token::Class {
+        if self.tokens[0].token != Token::Class {
             // FIXME: Consider adding an ErrorType for this.
             return Err(JackError::new(
                 ErrorType::GeneralError,

@@ -69,7 +69,7 @@ pub enum TokenType {
 #[derive(Debug)]
 pub struct TokenData {
     pub token_type: TokenType,
-    pub value: Token,
+    pub token: Token,
     pub token_str: Option<String>,
     pub path: String,
     pub line: u64,
@@ -79,7 +79,7 @@ pub struct TokenData {
 impl TokenData {
     fn new(
         token_type: TokenType,
-        value: Token,
+        token: Token,
         token_str: Option<String>,
         path: String,
         line: u64,
@@ -87,7 +87,7 @@ impl TokenData {
     ) -> Self {
         Self {
             token_type,
-            value,
+            token,
             token_str,
             path,
             line,
