@@ -81,13 +81,15 @@ impl Parser {
 
         let mut parse_tree = String::new();
         while self.has_more_tokens() {
-            let token = &self.tokens[self.token_index];
-            match token.token_type {
-                TokenType::Keyword => match token.value {
-                    Token::Class => {}
-                    Token::Constructor => {}
-                    Token::Function => {}
-                    Token::Method => {}
+            let current_token = self.tokens[self.token_index].clone();
+            match current_token.token_type {
+                TokenType::Keyword => match current_token.token {
+                    Token::Class => self.parse_class(),
+                    // FIXME: Should parse_subroutine take an enum specifying
+                    // the subroutine type? Something like Subroutine::Method.
+                    Token::Constructor | Token::Function | Token::Method => {
+                        self.parse_subroutine()
+                    }
                     Token::Field => {}
                     Token::Static => {}
                     Token::Var => {}
@@ -110,16 +112,16 @@ impl Parser {
                             ErrorType::GeneralError,
                             "LEXER IS NOT CORRECT! HAS NON KEYWORD WRAPPED IN \
                             KEYWORD TYPE",
-                            Some(token.path.clone()),
-                            Some(token.line),
-                            Some(token.column),
+                            Some(current_token.path.clone()),
+                            Some(current_token.line),
+                            Some(current_token.column),
                         ));
                     }
                 },
                 // I think for the most part these will get skipped because they
                 // will be advanced past in the parse... functions.
                 TokenType::Symbol => {
-                    match token.value {
+                    match current_token.token {
                         Token::OpenCurly => {}
                         Token::CloseCurly => {}
                         Token::OpenParen => {}
@@ -145,9 +147,9 @@ impl Parser {
                             ErrorType::GeneralError,
                             "LEXER IS NOT CORRECT! HAS NON SYMBOL WRAPPED IN \
                             SYMBOL TYPE",
-                            Some(token.path.clone()),
-                            Some(token.line),
-                            Some(token.column),
+                            Some(current_token.path.clone()),
+                            Some(current_token.line),
+                            Some(current_token.column),
                         )),
                     }
                 }
@@ -158,23 +160,25 @@ impl Parser {
                     return Err(JackError::new(
                         ErrorType::GarbageToken,
                         "Unknown token encountered.",
-                        Some(token.path.clone()),
-                        Some(token.line),
-                        Some(token.column),
+                        Some(current_token.path.clone()),
+                        Some(current_token.line),
+                        Some(current_token.column),
                     ))
                 }
             };
 
-            parse_tree.push_str(format!("<{:?}>", token.token_type).as_str());
+            parse_tree
+                .push_str(format!("<{:?}>", current_token.token_type).as_str());
             parse_tree.push_str(
-                token
+                current_token
                     .token_str
                     .as_ref()
-                    .unwrap_or(&format!("{:?}", token.value))
+                    .unwrap_or(&format!("{:?}", current_token.token))
                     .as_str(),
             );
-            parse_tree
-                .push_str(format!("</{:?}>\n", token.token_type).as_str());
+            parse_tree.push_str(
+                format!("</{:?}>\n", current_token.token_type).as_str(),
+            );
 
             self.token_index += 1;
         }
