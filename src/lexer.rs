@@ -56,7 +56,7 @@ pub enum Token {
     Garbage,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TokenType {
     Keyword,
     Symbol,
