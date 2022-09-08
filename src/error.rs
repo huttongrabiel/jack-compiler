@@ -32,13 +32,13 @@ impl Display for ErrorType {
 
 #[derive(Debug)]
 pub struct JackError {
-    pub error_type: ErrorType,
-    pub message: &'static str,
+    error_type: ErrorType,
+    message: &'static str,
     // file, line, and column are options because we can error while not
     // operating on a file. Such as not providing a file/directory at all.
-    pub file: Option<String>,
-    pub line: Option<u64>,
-    pub column: Option<u16>,
+    file: Option<String>,
+    line: Option<u64>,
+    column: Option<u16>,
 }
 
 impl Display for JackError {
