@@ -90,9 +90,11 @@ impl Parser {
                     Token::Constructor | Token::Function | Token::Method => {
                         self.parse_subroutine()
                     }
-                    Token::Field => {}
-                    Token::Static => {}
-                    Token::Var => {}
+                    Token::Field | Token::Static => self.parse_class_var_dec(),
+                    Token::Var => self.parse_var_dec(),
+                    // These blank ones are going only going to occur within
+                    // the parse... methods so they probably won't end up ever
+                    // being triggered here.
                     Token::Int => {}
                     Token::Char => {}
                     Token::Boolean => {}
@@ -101,12 +103,11 @@ impl Parser {
                     Token::False => {}
                     Token::Null => {}
                     Token::This => {}
-                    Token::Let => {}
-                    Token::Do => {}
-                    Token::If => {}
-                    Token::Else => {}
-                    Token::While => {}
-                    Token::Return => {}
+                    Token::Let => self.parse_let(),
+                    Token::Do => self.parse_do(),
+                    Token::If | Token::Else => self.parse_if(),
+                    Token::While => self.parse_while(),
+                    Token::Return => self.parse_return(),
                     _ => {
                         return Err(JackError::new(
                             ErrorType::GeneralError,
@@ -192,7 +193,7 @@ impl Parser {
 
     fn parse_class(&mut self) {}
 
-    fn parse_class_var_dev(&mut self) {}
+    fn parse_class_var_dec(&mut self) {}
 
     // Subroutine can be a method, function, or constructor
     fn parse_subroutine(&mut self) {}
