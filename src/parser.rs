@@ -104,10 +104,16 @@ impl Parser {
                     Token::Else => {}
                     Token::While => {}
                     Token::Return => {}
-                    _ => panic!(
-                        "LEXER IS NOT CORRECT! HAS NON KEYWORD WRAPPED IN\
-                            KEYWORD TYPE"
-                    ),
+                    _ => {
+                        return Err(JackError::new(
+                            ErrorType::GeneralError,
+                            "LEXER IS NOT CORRECT! HAS NON KEYWORD WRAPPED IN \
+                            KEYWORD TYPE",
+                            Some(token.path.clone()),
+                            Some(token.line),
+                            Some(token.column),
+                        ));
+                    }
                 },
                 // I think for the most part these will get skipped because they
                 // will be advanced past in the parse... functions.
@@ -136,11 +142,11 @@ impl Parser {
                         Token::IntegerConstant => {}
                         _ => return Err(JackError::new(
                             ErrorType::GeneralError,
-                            "LEXER IS NOT CORRECT! HAS NON SYMBOL WRAPPED IN\
+                            "LEXER IS NOT CORRECT! HAS NON SYMBOL WRAPPED IN \
                             SYMBOL TYPE",
-                            None,
-                            None,
-                            None,
+                            Some(token.path.clone()),
+                            Some(token.line),
+                            Some(token.column),
                         )),
                     }
                 }
