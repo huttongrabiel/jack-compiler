@@ -56,7 +56,7 @@ pub enum ParseTag {
 
 pub struct Parser {
     pub tokens: Vec<TokenData>,
-    pub token_index: u64,
+    pub token_index: usize,
 }
 
 impl Parser {
@@ -80,7 +80,8 @@ impl Parser {
         }
 
         let mut parse_tree = String::new();
-        for token in &self.tokens {
+        while self.has_more_tokens() {
+            let token = &self.tokens[self.token_index];
             match token.token_type {
                 TokenType::Keyword => match token.value {
                     Token::Class => {}
@@ -174,9 +175,15 @@ impl Parser {
             );
             parse_tree
                 .push_str(format!("</{:?}>\n", token.token_type).as_str());
+
+            self.token_index += 1;
         }
 
         Ok(parse_tree)
+    }
+
+    fn has_more_tokens(&self) -> bool {
+        self.token_index < self.tokens.len()
     }
 
     fn parse_class(&mut self) {}
