@@ -68,8 +68,18 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Result<String, JackError> {
-        let mut parse_tree = String::new();
+        if self.tokens[0].value != Token::Class {
+            // FIXME: Consider adding an ErrorType for this.
+            return Err(JackError::new(
+                ErrorType::GeneralError,
+                "All jack files must begin with a class declaration.",
+                Some(self.tokens[0].path.clone()),
+                Some(1),
+                Some(1),
+            ));
+        }
 
+        let mut parse_tree = String::new();
         for token in &self.tokens {
             match token.token_type {
                 TokenType::Keyword => match token.value {
