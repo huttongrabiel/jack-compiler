@@ -81,6 +81,8 @@ impl Parser {
 
         let mut parse_tree = String::new();
         while self.has_more_tokens() {
+            let start_index = self.token_index;
+
             let current_token = self.tokens[self.token_index].clone();
             match current_token.token_type {
                 TokenType::Keyword => match current_token.token {
@@ -181,7 +183,9 @@ impl Parser {
                 format!("</{:?}>\n", current_token.token_type).as_str(),
             );
 
-            self.token_index += 1;
+            if start_index == self.token_index {
+                self.token_index += 1;
+            }
         }
 
         Ok(parse_tree)
