@@ -224,9 +224,13 @@ impl Parser {
             ));
         }
 
-        class_parse_tree.push_str(&self.parse_class_var_dec()?);
+        // Move to the first token of the body of the class.
+        self.index += 1;
 
-        // We should only return to this point once we have reached to end of
+        class_parse_tree.push_str(&self.parse_class_var_dec()?);
+        class_parse_tree.push_str(&self.parse_subroutine()?);
+
+        // We should only return to this point once we have reached the end of
         // the class.
         if self.tokens[self.index].token != Token::CloseCurly {
             return Err(JackError::new(
@@ -244,6 +248,13 @@ impl Parser {
     }
 
     fn parse_class_var_dec(&mut self) -> Result<String, JackError> {
+        if self.tokens[self.index].token != Token::Field
+            || self.tokens[self.index].token != Token::Static
+        {
+            // Classes do not require having variable declarations.
+            return Ok(String::from(""));
+        }
+
         Ok(String::from("PLACEHOLDER"))
     }
 
