@@ -55,8 +55,8 @@ pub enum ParseTag {
 }
 
 pub struct Parser {
-    pub tokens: Vec<TokenData>,
-    pub index: usize,
+    tokens: Vec<TokenData>,
+    index: usize,
 }
 
 impl Parser {
