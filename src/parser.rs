@@ -77,113 +77,120 @@ impl Parser {
         }
 
         let mut parse_tree = String::new();
-        while self.has_more_tokens() {
-            let start_index = self.index;
 
-            let current_token = self.tokens[self.index].clone();
-            match current_token.token_type {
-                TokenType::Keyword => match current_token.token {
-                    Token::Class => self.parse_class(),
-                    // FIXME: Should parse_subroutine take an enum specifying
-                    // the subroutine type? Something like Subroutine::Method.
-                    Token::Constructor | Token::Function | Token::Method => {
-                        self.parse_subroutine()
-                    }
-                    Token::Field | Token::Static => self.parse_class_var_dec(),
-                    Token::Var => self.parse_var_dec(),
-                    // These blank ones are going only going to occur within
-                    // the parse... methods so they probably won't end up ever
-                    // being triggered here.
-                    Token::Int => {}
-                    Token::Char => {}
-                    Token::Boolean => {}
-                    Token::Void => {}
-                    Token::True => {}
-                    Token::False => {}
-                    Token::Null => {}
-                    Token::This => {}
-                    Token::Let => self.parse_let(),
-                    Token::Do => self.parse_do(),
-                    Token::If | Token::Else => self.parse_if(),
-                    Token::While => self.parse_while(),
-                    Token::Return => self.parse_return(),
-                    _ => {
-                        return Err(JackError::new(
-                            ErrorType::GeneralError,
-                            "LEXER IS NOT CORRECT! HAS NON KEYWORD WRAPPED IN \
-                            KEYWORD TYPE",
-                            Some(current_token.path.clone()),
-                            Some(current_token.line),
-                            Some(current_token.column),
-                        ));
-                    }
-                },
-                // I think for the most part these will get skipped because they
-                // will be advanced past in the parse... functions.
-                TokenType::Symbol => {
-                    match current_token.token {
-                        Token::OpenCurly => {}
-                        Token::CloseCurly => {}
-                        Token::OpenParen => {}
-                        Token::CloseParen => {}
-                        Token::OpenBracket => {}
-                        Token::CloseBracket => {}
-                        Token::Dot => {}
-                        Token::Comma => {}
-                        Token::Semicolon => {}
-                        Token::Plus => {}
-                        Token::Minus => {}
-                        Token::Asterik => {}
-                        Token::BackSlash => {}
-                        Token::Ampersand => {}
-                        Token::Pipe => {}
-                        Token::LessThan => {}
-                        Token::GreaterThan => {}
-                        Token::Equal => {}
-                        Token::Tilde => {}
-                        Token::DoubleQuote => {}
-                        Token::IntegerConstant => {}
-                        _ => return Err(JackError::new(
-                            ErrorType::GeneralError,
-                            "LEXER IS NOT CORRECT! HAS NON SYMBOL WRAPPED IN \
-                            SYMBOL TYPE",
-                            Some(current_token.path.clone()),
-                            Some(current_token.line),
-                            Some(current_token.column),
-                        )),
-                    }
-                }
-                TokenType::Identifier => {}
-                TokenType::IntConst => {}
-                TokenType::StringConst => {}
-                TokenType::Garbage => {
-                    return Err(JackError::new(
-                        ErrorType::GarbageToken,
-                        "Unknown token encountered.",
-                        Some(current_token.path.clone()),
-                        Some(current_token.line),
-                        Some(current_token.column),
-                    ))
-                }
-            };
+        //  parse_class() is the jumping off point for our parser. It should
+        //  call the functions it needs which in turn call other functions etc.
+        //  But each jack file starts with a class so that is all we should need
+        //  to call the begint he descent parsing.
+        parse_tree.push_str(&self.parse_class()?);
 
-            parse_tree
-                .push_str(format!("<{:?}>", current_token.token_type).as_str());
-            parse_tree.push_str(
-                current_token
-                    .token_str
-                    .as_ref()
-                    .unwrap_or(&format!("{:?}", current_token.token))
-                    .as_str(),
-            );
-            parse_tree.push_str(
-                format!("</{:?}>\n", current_token.token_type).as_str(),
-            );
-
-            if start_index == self.index {
-                self.index += 1;
-            }
-        }
+        //        while self.has_more_tokens() {
+        //            let start_index = self.index;
+        //
+        //            let current_token = self.tokens[self.index].clone();
+        //            match current_token.token_type {
+        //                TokenType::Keyword => match current_token.token {
+        //                    Token::Class => self.parse_class(),
+        //                    // FIXME: Should parse_subroutine take an enum specifying
+        //                    // the subroutine type? Something like Subroutine::Method.
+        //                    Token::Constructor | Token::Function | Token::Method => {
+        //                        self.parse_subroutine()
+        //                    }
+        //                    Token::Field | Token::Static => self.parse_class_var_dec(),
+        //                    Token::Var => self.parse_var_dec(),
+        //                    // These blank ones are going only going to occur within
+        //                    // the parse... methods so they probably won't end up ever
+        //                    // being triggered here.
+        //                    Token::Int => {}
+        //                    Token::Char => {}
+        //                    Token::Boolean => {}
+        //                    Token::Void => {}
+        //                    Token::True => {}
+        //                    Token::False => {}
+        //                    Token::Null => {}
+        //                    Token::This => {}
+        //                    Token::Let => self.parse_let(),
+        //                    Token::Do => self.parse_do(),
+        //                    Token::If | Token::Else => self.parse_if(),
+        //                    Token::While => self.parse_while(),
+        //                    Token::Return => self.parse_return(),
+        //                    _ => {
+        //                        return Err(JackError::new(
+        //                            ErrorType::GeneralError,
+        //                            "LEXER IS NOT CORRECT! HAS NON KEYWORD WRAPPED IN \
+        //                            KEYWORD TYPE",
+        //                            Some(current_token.path.clone()),
+        //                            Some(current_token.line),
+        //                            Some(current_token.column),
+        //                        ));
+        //                    }
+        //                },
+        //                // I think for the most part these will get skipped because they
+        //                // will be advanced past in the parse... functions.
+        //                TokenType::Symbol => {
+        //                    match current_token.token {
+        //                        Token::OpenCurly => {}
+        //                        Token::CloseCurly => {}
+        //                        Token::OpenParen => {}
+        //                        Token::CloseParen => {}
+        //                        Token::OpenBracket => {}
+        //                        Token::CloseBracket => {}
+        //                        Token::Dot => {}
+        //                        Token::Comma => {}
+        //                        Token::Semicolon => {}
+        //                        Token::Plus => {}
+        //                        Token::Minus => {}
+        //                        Token::Asterik => {}
+        //                        Token::BackSlash => {}
+        //                        Token::Ampersand => {}
+        //                        Token::Pipe => {}
+        //                        Token::LessThan => {}
+        //                        Token::GreaterThan => {}
+        //                        Token::Equal => {}
+        //                        Token::Tilde => {}
+        //                        Token::DoubleQuote => {}
+        //                        Token::IntegerConstant => {}
+        //                        _ => return Err(JackError::new(
+        //                            ErrorType::GeneralError,
+        //                            "LEXER IS NOT CORRECT! HAS NON SYMBOL WRAPPED IN \
+        //                            SYMBOL TYPE",
+        //                            Some(current_token.path.clone()),
+        //                            Some(current_token.line),
+        //                            Some(current_token.column),
+        //                        )),
+        //                    }
+        //                }
+        //                TokenType::Identifier => {}
+        //                TokenType::IntConst => {}
+        //                TokenType::StringConst => {}
+        //                TokenType::Garbage => {
+        //                    return Err(JackError::new(
+        //                        ErrorType::GarbageToken,
+        //                        "Unknown token encountered.",
+        //                        Some(current_token.path.clone()),
+        //                        Some(current_token.line),
+        //                        Some(current_token.column),
+        //                    ))
+        //                }
+        //            };
+        //
+        //            parse_tree
+        //                .push_str(format!("<{:?}>", current_token.token_type).as_str());
+        //            parse_tree.push_str(
+        //                current_token
+        //                    .token_str
+        //                    .as_ref()
+        //                    .unwrap_or(&format!("{:?}", current_token.token))
+        //                    .as_str(),
+        //            );
+        //            parse_tree.push_str(
+        //                format!("</{:?}>\n", current_token.token_type).as_str(),
+        //            );
+        //
+        //            if start_index == self.index {
+        //                self.index += 1;
+        //            }
+        //        }
 
         Ok(parse_tree)
     }
@@ -192,36 +199,104 @@ impl Parser {
         self.index < self.tokens.len()
     }
 
-    fn parse_class(&mut self) {}
+    fn parse_class(&mut self) -> Result<String, JackError> {
+        let mut class_parse_tree = String::from("<class>\n");
 
-    fn parse_class_var_dec(&mut self) {}
+        self.index += 1;
+        if self.tokens[self.index].token_type != TokenType::Identifier {
+            return Err(JackError::new(
+                ErrorType::GeneralError,
+                "Expect identifier. 'class _identifer_ {...}'",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        self.index += 1;
+        if self.tokens[self.index].token != Token::OpenCurly {
+            return Err(JackError::new(
+                ErrorType::GeneralError,
+                "Expected '{'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        class_parse_tree.push_str(&self.parse_class_var_dec()?);
+
+        // We should only return to this point once we have reached to end of
+        // the class.
+        if self.tokens[self.index].token != Token::CloseCurly {
+            return Err(JackError::new(
+                ErrorType::GeneralError,
+                "Expected '}'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        class_parse_tree.push_str("</class>");
+
+        Ok(class_parse_tree)
+    }
+
+    fn parse_class_var_dec(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
     // Subroutine can be a method, function, or constructor
-    fn parse_subroutine(&mut self) {}
+    fn parse_subroutine(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
-    fn parse_parameter_list(&mut self) {}
+    fn parse_parameter_list(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
-    fn parse_var_dec(&mut self) {}
+    fn parse_var_dec(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
-    fn parse_statements(&mut self) {}
+    fn parse_statements(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
-    fn parse_do(&mut self) {}
+    fn parse_do(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
-    fn parse_let(&mut self) {}
+    fn parse_let(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
-    fn parse_while(&mut self) {}
+    fn parse_while(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
-    fn parse_return(&mut self) {}
+    fn parse_return(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
-    fn parse_if(&mut self) {}
+    fn parse_if(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
-    fn parse_expression(&mut self) {}
+    fn parse_expression(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
     // Will require a peek() function to see type of next token. This is to
     // distinguish between foo, foo[i], foo.print(), etc.
-    fn parse_term(&mut self) {}
+    fn parse_term(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 
     // Expression lists are lists of expressions separated by commas. They CAN
     // be empty.
-    fn parse_expression_list(&mut self) {}
+    fn parse_expression_list(&mut self) -> Result<String, JackError> {
+        Ok(String::from("PLACEHOLDER"))
+    }
 }
