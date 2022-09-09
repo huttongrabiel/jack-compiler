@@ -56,6 +56,15 @@ pub enum Token {
     Garbage,
 }
 
+impl Token {
+    pub fn is_type(&self) -> bool {
+        match self {
+            Token::Int | Token::Char | Token::Boolean | Token::Identifier => true,
+            _ => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TokenType {
     Keyword,

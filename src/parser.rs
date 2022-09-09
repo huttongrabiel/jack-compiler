@@ -295,20 +295,18 @@ impl Parser {
 
         self.index += 1;
 
-        match self.tokens[self.index].token {
-            Token::Int | Token::Char | Token::Boolean | Token::Identifier => {
-                cvd_parse_tree.push_str(&self.generate_xml_tag())
-            }
-            _ => {
-                return Err(JackError::new(
-                    ErrorType::GeneralError,
-                    "Expected type.",
-                    Some(self.tokens[self.index].path.clone()),
-                    Some(self.tokens[self.index].line),
-                    Some(self.tokens[self.index].column),
-                ))
-            }
-        };
+        if self.tokens[self.index].token.is_type() {
+            cvd_parse_tree.push_str(&self.generate_xml_tag());
+        } else {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedType?)
+                ErrorType::GeneralError,
+                "Expected type.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
 
         self.index += 1;
 
