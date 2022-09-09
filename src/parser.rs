@@ -459,6 +459,7 @@ impl Parser {
         self.index += 1;
 
         // Parse SubroutineBody.
+        subroutine_parse_tree.push_str(&self.generate_indent());
         writeln!(subroutine_parse_tree, "<{:?}>", ParseTag::SubroutineBody)
             .expect("Failed to write <SubroutineBody>.");
         self.indent_amount += 2;
@@ -495,14 +496,14 @@ impl Parser {
         subroutine_parse_tree.push_str(&self.generate_xml_tag());
 
         self.indent_amount -= 2;
-        self.generate_indent();
+        subroutine_parse_tree.push_str(&self.generate_indent());
         writeln!(subroutine_parse_tree, "</{:?}>", ParseTag::SubroutineBody)
             .expect("Failed to write </SubroutineBody>.");
 
         // Close up SubroutineDec
         self.indent_amount -= 2;
 
-        self.generate_indent();
+        subroutine_parse_tree.push_str(&self.generate_indent());
         writeln!(subroutine_parse_tree, "</{:?}>", ParseTag::SubroutineDec)
             .expect("Failed to write </SubroutineDec>.");
 
