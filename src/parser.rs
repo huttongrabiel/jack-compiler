@@ -92,7 +92,7 @@ impl Parser {
         //        while self.has_more_tokens() {
         //            let start_index = self.index;
         //
-        //            let current_token = self.tokens[self.index].clone();
+        //            let current_token = self.current_token().clone();
         //            match current_token.token_type {
         //                TokenType::Keyword => match current_token.token {
         //                    Token::Class => self.parse_class(),
@@ -204,28 +204,38 @@ impl Parser {
         self.index < self.tokens.len()
     }
 
+    fn current_token(&self) -> &TokenData {
+        &self.tokens[self.index]
+    }
+
     fn parse_class(&mut self) -> Result<String, JackError> {
         let mut class_parse_tree = String::from("<class>\n");
 
+        class_parse_tree
+            .push_str(&self.generate_xml_tag(&self.current_token()));
+
+        self.indent_amount += 2;
+
         self.index += 1;
-        if self.tokens[self.index].token_type != TokenType::Identifier {
+
+        if self.current_token().token_type != TokenType::Identifier {
             return Err(JackError::new(
                 ErrorType::GeneralError,
                 "Expect identifier. 'class _identifer_ {...}'",
-                Some(self.tokens[self.index].path.clone()),
-                Some(self.tokens[self.index].line),
-                Some(self.tokens[self.index].column),
+                Some(self.current_token().path.clone()),
+                Some(self.current_token().line),
+                Some(self.current_token().column),
             ));
         }
-
         self.index += 1;
-        if self.tokens[self.index].token != Token::OpenCurly {
+
+        if self.current_token().token != Token::OpenCurly {
             return Err(JackError::new(
                 ErrorType::GeneralError,
                 "Expected '{'.",
-                Some(self.tokens[self.index].path.clone()),
-                Some(self.tokens[self.index].line),
-                Some(self.tokens[self.index].column),
+                Some(self.current_token().path.clone()),
+                Some(self.current_token().line),
+                Some(self.current_token().column),
             ));
         }
 
@@ -237,13 +247,13 @@ impl Parser {
 
         // We should only return to this point once we have reached the end of
         // the class.
-        if self.tokens[self.index].token != Token::CloseCurly {
+        if self.current_token().token != Token::CloseCurly {
             return Err(JackError::new(
                 ErrorType::GeneralError,
                 "Expected '}'.",
-                Some(self.tokens[self.index].path.clone()),
-                Some(self.tokens[self.index].line),
-                Some(self.tokens[self.index].column),
+                Some(self.current_token().path.clone()),
+                Some(self.current_token().line),
+                Some(self.current_token().column),
             ));
         }
 
@@ -253,8 +263,8 @@ impl Parser {
     }
 
     fn parse_class_var_dec(&mut self) -> Result<String, JackError> {
-        if self.tokens[self.index].token != Token::Field
-            && self.tokens[self.index].token != Token::Static
+        if self.current_token().token != Token::Field
+            && self.current_token().token != Token::Static
         {
             // Classes do not require having variable declarations.
             return Ok(String::from(""));
@@ -316,7 +326,7 @@ impl Parser {
         Ok(String::from("PLACEHOLDER"))
     }
 
-    fn generate_xml_tag(&self, token: TokenData) -> String {
+    fn generate_xml_tag(&self, token: &TokenData) -> String {
         let mut xml_tag = String::new();
 
         xml_tag.push_str(&self.generate_indent());
