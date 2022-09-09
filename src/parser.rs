@@ -57,11 +57,16 @@ pub enum ParseTag {
 pub struct Parser {
     tokens: Vec<TokenData>,
     index: usize,
+    indent_amount: usize,
 }
 
 impl Parser {
     pub fn new(tokens: Vec<TokenData>) -> Self {
-        Self { tokens, index: 0 }
+        Self {
+            tokens,
+            index: 0,
+            indent_amount: 0,
+        }
     }
 
     pub fn parse(&mut self) -> Result<String, JackError> {
@@ -309,5 +314,8 @@ impl Parser {
     // be empty.
     fn parse_expression_list(&mut self) -> Result<String, JackError> {
         Ok(String::from("PLACEHOLDER"))
+    }
+    fn generate_indent(&self) -> String {
+        " ".repeat(self.indent_amount)
     }
 }
