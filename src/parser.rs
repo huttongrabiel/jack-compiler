@@ -252,6 +252,7 @@ impl Parser {
         // Move to the first token of the body of the class.
         self.index += 1;
 
+        // Into the depths we go!
         class_parse_tree.push_str(&self.parse_class_var_dec()?);
         class_parse_tree.push_str(&self.parse_subroutine()?);
 
@@ -364,7 +365,160 @@ impl Parser {
 
     // Subroutine can be a method, function, or constructor
     fn parse_subroutine(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        // Subroutines are not required in a class.
+        match self.tokens[self.index].token {
+            Token::Constructor | Token::Function | Token::Method => (),
+            _ => return Ok(String::from("")),
+        }
+
+        let mut subroutine_parse_tree = self.generate_indent();
+
+        // Parse start of SubroutineDec.
+        writeln!(subroutine_parse_tree, "<{:?}>", ParseTag::SubroutineDec)
+            .expect("Failed to write <SubroutineDec>.");
+
+        self.indent_amount += 2;
+
+        subroutine_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        match self.tokens[self.index].token {
+            Token::Void | Token::Int | Token::Boolean | Token::Char | Token::Identifier => (),
+            _ => {
+                return Err(JackError::new(
+                    ErrorType::GeneralError,
+                    "Expected subroutine return type.",
+                    Some(self.tokens[self.index].path.clone()),
+                    Some(self.tokens[self.index].line),
+                    Some(self.tokens[self.index].column),
+                ));
+            }
+        }
+
+        subroutine_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if self.tokens[self.index].token != Token::Identifier {
+            return Err(JackError::new(
+                ErrorType::MissingIdentifier,
+                "Expected subroutine name.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        subroutine_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if self.tokens[self.index].token != Token::OpenParen {
+            return Err(JackError::new(
+                ErrorType::GeneralError,
+                "Expected '('.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        };
+
+        subroutine_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        // Parse ParameterList.
+        self.generate_indent();
+        writeln!(subroutine_parse_tree, "<{:?}>", ParseTag::ParameterList)
+            .expect("Failed to write <ParameterList>.");
+        self.indent_amount += 2;
+
+        // TODO: Make sure parse_parameter_list() moves the index up to the
+        // closing parentheses of the parameter list before returning. That is
+        // the behavior expected in the following lines of code.
+        subroutine_parse_tree.push_str(&self.parse_parameter_list()?);
+
+        self.indent_amount -= 2;
+        self.generate_indent();
+        writeln!(subroutine_parse_tree, "</{:?}>", ParseTag::ParameterList)
+            .expect("Failed to write </ParameterList>.");
+
+        if self.tokens[self.index].token != Token::CloseParen {
+            return Err(JackError::new(
+                ErrorType::GeneralError,
+                "Expected ')'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        };
+
+        subroutine_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        // Parse SubroutineBody.
+        writeln!(subroutine_parse_tree, "<{:?}>", ParseTag::SubroutineBody)
+            .expect("Failed to write <SubroutineBody>.");
+        self.indent_amount += 2;
+
+        if self.tokens[self.index].token != Token::OpenCurly {
+            return Err(JackError::new(
+                ErrorType::GeneralError,
+                "Expected '{'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        subroutine_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        // We dive DEEPER into the depths!
+        subroutine_parse_tree.push_str(&self.parse_var_dec()?);
+        subroutine_parse_tree.push_str(&self.parse_statements()?);
+
+        if self.tokens[self.index].token != Token::CloseCurly {
+            return Err(JackError::new(
+                ErrorType::GeneralError,
+                "Expected '}'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        subroutine_parse_tree.push_str(&self.generate_xml_tag());
+
+        self.indent_amount -= 2;
+        self.generate_indent();
+        writeln!(subroutine_parse_tree, "</{:?}>", ParseTag::SubroutineBody)
+            .expect("Failed to write </SubroutineBody>.");
+
+        // Close up SubroutineDec
+        self.indent_amount -= 2;
+
+        self.generate_indent();
+        writeln!(subroutine_parse_tree, "</{:?}>", ParseTag::SubroutineDec)
+            .expect("Failed to write </SubroutineDec>.");
+
+        // Continue parsing other subroutines or reach end of class.
+        self.index += 1;
+
+        match self.tokens[self.index].token {
+            Token::Constructor | Token::Function | Token::Method => {
+                subroutine_parse_tree.push_str(&self.parse_subroutine()?)
+            }
+            Token::CloseCurly => subroutine_parse_tree.push_str(&self.generate_xml_tag()),
+            _ => {
+                return Err(JackError::new(
+                    ErrorType::GeneralError,
+                    ".",
+                    Some(self.tokens[self.index].path.clone()),
+                    Some(self.tokens[self.index].line),
+                    Some(self.tokens[self.index].column),
+                ));
+            }
+        };
+
+        Ok(subroutine_parse_tree)
     }
 
     fn parse_parameter_list(&mut self) -> Result<String, JackError> {
