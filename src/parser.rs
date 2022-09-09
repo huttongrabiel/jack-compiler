@@ -216,24 +216,24 @@ impl Parser {
 
         self.index += 1;
 
-        if self.current_token().token_type != TokenType::Identifier {
+        if self.tokens[self.index].token_type != TokenType::Identifier {
             return Err(JackError::new(
                 ErrorType::GeneralError,
                 "Expect identifier. 'class _identifer_ {...}'",
-                Some(self.current_token().path.clone()),
-                Some(self.current_token().line),
-                Some(self.current_token().column),
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
             ));
         }
         self.index += 1;
 
-        if self.current_token().token != Token::OpenCurly {
+        if self.tokens[self.index].token != Token::OpenCurly {
             return Err(JackError::new(
                 ErrorType::GeneralError,
                 "Expected '{'.",
-                Some(self.current_token().path.clone()),
-                Some(self.current_token().line),
-                Some(self.current_token().column),
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
             ));
         }
 
@@ -245,13 +245,13 @@ impl Parser {
 
         // We should only return to this point once we have reached the end of
         // the class.
-        if self.current_token().token != Token::CloseCurly {
+        if self.tokens[self.index].token != Token::CloseCurly {
             return Err(JackError::new(
                 ErrorType::GeneralError,
                 "Expected '}'.",
-                Some(self.current_token().path.clone()),
-                Some(self.current_token().line),
-                Some(self.current_token().column),
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
             ));
         }
 
