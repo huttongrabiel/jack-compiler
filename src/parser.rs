@@ -313,7 +313,7 @@ impl Parser {
 
         if self.tokens[self.index].token != Token::Identifier {
             return Err(JackError::new(
-                ErrorType::GeneralError,
+                ErrorType::MissingIdentifier,
                 "Expected variable name.",
                 Some(self.tokens[self.index].path.clone()),
                 Some(self.tokens[self.index].line),
