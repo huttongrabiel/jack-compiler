@@ -156,20 +156,17 @@ impl Lexer {
                 b'=' => (Token::Equal, TokenType::Symbol),
                 b'~' => (Token::Tilde, TokenType::Symbol),
                 b'"' => {
-                    let (tok, tok_type, tok_str) =
-                        self.lex_string_constant()?;
+                    let (tok, tok_type, tok_str) = self.lex_string_constant()?;
                     token_str = Some(tok_str);
                     (tok, tok_type)
                 }
                 _ => {
                     if current_byte.is_ascii_alphabetic() {
-                        let (tok, tok_type, tok_str) =
-                            self.lex_keyword_or_identifier();
+                        let (tok, tok_type, tok_str) = self.lex_keyword_or_identifier();
                         token_str = tok_str;
                         (tok, tok_type)
                     } else if current_byte.is_ascii_digit() {
-                        let (tok, tok_type, int_str) =
-                            self.lex_integer_constant()?;
+                        let (tok, tok_type, int_str) = self.lex_integer_constant()?;
                         token_str = Some(int_str);
                         (tok, tok_type)
                     } else {
@@ -225,15 +222,11 @@ impl Lexer {
         self.index >= self.file.file_contents.as_bytes().len()
     }
 
-    fn lex_keyword_or_identifier(
-        &mut self,
-    ) -> (Token, TokenType, Option<String>) {
+    fn lex_keyword_or_identifier(&mut self) -> (Token, TokenType, Option<String>) {
         let input = self.file.file_contents.as_bytes();
 
         let mut builder = String::new();
-        while !input[self.index].is_ascii_whitespace()
-            && !is_symbol(input[self.index])
-        {
+        while !input[self.index].is_ascii_whitespace() && !is_symbol(input[self.index]) {
             builder.push(input[self.index] as char);
             self.file.column += 1;
             self.index += 1;
@@ -241,9 +234,7 @@ impl Lexer {
 
         match builder.as_str() {
             "class" => (Token::Class, TokenType::Keyword, Some(builder)),
-            "constructor" => {
-                (Token::Constructor, TokenType::Keyword, Some(builder))
-            }
+            "constructor" => (Token::Constructor, TokenType::Keyword, Some(builder)),
             "function" => (Token::Function, TokenType::Keyword, Some(builder)),
             "method" => (Token::Method, TokenType::Keyword, Some(builder)),
             "field" => (Token::Field, TokenType::Keyword, Some(builder)),
@@ -308,15 +299,11 @@ impl Lexer {
         Ok(())
     }
 
-    fn lex_integer_constant(
-        &mut self,
-    ) -> Result<(Token, TokenType, String), JackError> {
+    fn lex_integer_constant(&mut self) -> Result<(Token, TokenType, String), JackError> {
         let input = self.file.file_contents.as_bytes();
 
         let mut integer_builder = String::new();
-        while !input[self.index].is_ascii_whitespace()
-            && !is_symbol(input[self.index])
-        {
+        while !input[self.index].is_ascii_whitespace() && !is_symbol(input[self.index]) {
             integer_builder.push(input[self.index] as char);
             self.index += 1;
             self.file.column += 1;
@@ -329,10 +316,7 @@ impl Lexer {
                     "Invalid integer constant.",
                     Some(self.file.path.clone()),
                     Some(self.file.line),
-                    Some(
-                        self.file.column
-                            - (integer_builder.len() as u16 - i as u16),
-                    ),
+                    Some(self.file.column - (integer_builder.len() as u16 - i as u16)),
                 ));
             }
         }
@@ -341,9 +325,7 @@ impl Lexer {
     }
 
     // TODO: FUTURE - Support multi line strings.
-    fn lex_string_constant(
-        &mut self,
-    ) -> Result<(Token, TokenType, String), JackError> {
+    fn lex_string_constant(&mut self) -> Result<(Token, TokenType, String), JackError> {
         let input = self.file.file_contents.as_bytes();
 
         // Store start of String to point in the case of an error.
@@ -433,8 +415,8 @@ impl Lexer {
 
 fn is_symbol(byte: u8) -> bool {
     let symbols = vec![
-        b'{', b'}', b'(', b')', b'[', b']', b'.', b',', b';', b'+', b'-', b'*',
-        b'/', b'&', b'|', b'<', b'>', b'=', b'~', b'"',
+        b'{', b'}', b'(', b')', b'[', b']', b'.', b',', b';', b'+', b'-', b'*', b'/', b'&', b'|',
+        b'<', b'>', b'=', b'~', b'"',
     ];
 
     if symbols.contains(&byte) {

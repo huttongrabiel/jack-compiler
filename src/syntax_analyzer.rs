@@ -59,10 +59,8 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
     for jack_file in jack_files {
         parse_tree.push_str("<tokens>\n");
 
-        let file_contents =
-            fs::read_to_string(jack_file).unwrap_or_else(|_| {
-                panic!("{}", format!("Unable to open file \"{}\".", jack_file))
-            });
+        let file_contents = fs::read_to_string(jack_file)
+            .unwrap_or_else(|_| panic!("{}", format!("Unable to open file \"{}\".", jack_file)));
 
         let path = std::path::Path::new(&jack_file);
         let file_name = path.file_name().unwrap().to_str().unwrap();
@@ -106,11 +104,7 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
         if DEBUG {
             eprintln!(
                 "Built path: {}",
-                &format!(
-                    "{}/{}.xml",
-                    ppath,
-                    file_name.trim_end_matches(".jack"),
-                )
+                &format!("{}/{}.xml", ppath, file_name.trim_end_matches(".jack"),)
             )
         }
 
@@ -164,13 +158,8 @@ fn get_jack_files() -> Result<Vec<String>, JackError> {
     if path.is_dir {
         jack_files = fs::read_dir(path.raw_path)
             .unwrap()
-            .filter(|dir_entry| {
-                dir_entry.as_ref().unwrap().path().extension().unwrap()
-                    == "jack"
-            })
-            .map(|dir_entry| {
-                dir_entry.unwrap().path().to_str().unwrap().to_owned()
-            })
+            .filter(|dir_entry| dir_entry.as_ref().unwrap().path().extension().unwrap() == "jack")
+            .map(|dir_entry| dir_entry.unwrap().path().to_str().unwrap().to_owned())
             .collect();
     } else if path.raw_path.ends_with(".jack") {
         jack_files.push(path.raw_path);
