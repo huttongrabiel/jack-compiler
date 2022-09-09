@@ -73,8 +73,8 @@ impl Parser {
 
     pub fn parse(&mut self) -> Result<String, JackError> {
         if self.tokens[0].token != Token::Class {
-            // FIXME: Consider adding an ErrorType for this.
             return Err(JackError::new(
+                // FIXME: Create ErrorType for this. (NoClassDeclaration?)
                 ErrorType::GeneralError,
                 "All jack files must begin with a class declaration.",
                 Some(self.tokens[0].path.clone()),
@@ -225,6 +225,7 @@ impl Parser {
 
         if self.tokens[self.index].token_type != TokenType::Identifier {
             return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedIdentifer?)
                 ErrorType::GeneralError,
                 "Expect identifier. 'class _identifer_ {...}'",
                 Some(self.tokens[self.index].path.clone()),
@@ -239,6 +240,7 @@ impl Parser {
 
         if self.tokens[self.index].token != Token::OpenCurly {
             return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedOpenCurly?)
                 ErrorType::GeneralError,
                 "Expected '{'.",
                 Some(self.tokens[self.index].path.clone()),
@@ -260,6 +262,7 @@ impl Parser {
         // the class.
         if self.tokens[self.index].token != Token::CloseCurly {
             return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedCloseCurly)
                 ErrorType::GeneralError,
                 "Expected '}'.",
                 Some(self.tokens[self.index].path.clone()),
@@ -332,6 +335,7 @@ impl Parser {
                 cvd_parse_tree.push_str(&self.generate_xml_tag());
             } else {
                 return Err(JackError::new(
+                    // FIXME: Add ErrorType for this. (BadMultiVariableDeclaration?)
                     ErrorType::GeneralError,
                     "Expected sequence of ', VarName' for single line multi variable declaration.",
                     Some(self.tokens[self.index].path.clone()),
@@ -384,6 +388,7 @@ impl Parser {
             Token::Void | Token::Int | Token::Boolean | Token::Char | Token::Identifier => (),
             _ => {
                 return Err(JackError::new(
+                    // FIXME: Add ErrorType for this. (NoSubroutineReturnType?)
                     ErrorType::GeneralError,
                     "Expected subroutine return type.",
                     Some(self.tokens[self.index].path.clone()),
@@ -411,6 +416,7 @@ impl Parser {
 
         if self.tokens[self.index].token != Token::OpenParen {
             return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedOpenParen)
                 ErrorType::GeneralError,
                 "Expected '('.",
                 Some(self.tokens[self.index].path.clone()),
@@ -440,6 +446,7 @@ impl Parser {
 
         if self.tokens[self.index].token != Token::CloseParen {
             return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedCloseParen)
                 ErrorType::GeneralError,
                 "Expected ')'.",
                 Some(self.tokens[self.index].path.clone()),
@@ -458,6 +465,7 @@ impl Parser {
 
         if self.tokens[self.index].token != Token::OpenCurly {
             return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedOpenCurly)
                 ErrorType::GeneralError,
                 "Expected '{'.",
                 Some(self.tokens[self.index].path.clone()),
@@ -475,6 +483,7 @@ impl Parser {
 
         if self.tokens[self.index].token != Token::CloseCurly {
             return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedCloseCurly)
                 ErrorType::GeneralError,
                 "Expected '}'.",
                 Some(self.tokens[self.index].path.clone()),
@@ -507,8 +516,9 @@ impl Parser {
             Token::CloseCurly => subroutine_parse_tree.push_str(&self.generate_xml_tag()),
             _ => {
                 return Err(JackError::new(
+                    // FIXME: Add ErrorType for this. (UnexpectedToken?)
                     ErrorType::GeneralError,
-                    ".",
+                    "Expected end of class or another subroutine. Found other.",
                     Some(self.tokens[self.index].path.clone()),
                     Some(self.tokens[self.index].line),
                     Some(self.tokens[self.index].column),
