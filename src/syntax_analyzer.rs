@@ -57,8 +57,6 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
     let mut parse_tree = String::new();
 
     for jack_file in jack_files {
-        parse_tree.push_str("<tokens>\n");
-
         let file_contents = fs::read_to_string(jack_file)
             .unwrap_or_else(|_| panic!("{}", format!("Unable to open file \"{}\".", jack_file)));
 
@@ -84,7 +82,6 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
         let mut parser = Parser::new(tokens);
         let current_parse_tree = parser.parse()?;
         parse_tree.push_str(&current_parse_tree);
-        parse_tree.push_str("</tokens>");
 
         let mut ppath = match path.parent() {
             Some(ppath) => ppath.to_str().unwrap(),
