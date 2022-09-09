@@ -434,20 +434,9 @@ impl Parser {
         self.index += 1;
 
         // Parse ParameterList.
-        self.generate_indent();
-        writeln!(subroutine_parse_tree, "<{:?}>", ParseTag::ParameterList)
-            .expect("Failed to write <ParameterList>.");
-        self.indent_amount += 2;
-
-        // TODO: Make sure parse_parameter_list() moves the index up to the
-        // closing parentheses of the parameter list before returning. That is
-        // the behavior expected in the following lines of code.
         subroutine_parse_tree.push_str(&self.parse_parameter_list()?);
 
-        self.indent_amount -= 2;
-        self.generate_indent();
-        writeln!(subroutine_parse_tree, "</{:?}>", ParseTag::ParameterList)
-            .expect("Failed to write </ParameterList>.");
+        eprintln!("current token: {:?}", self.tokens[self.index].token);
 
         if self.tokens[self.index].token != Token::CloseParen {
             return Err(JackError::new(
@@ -536,7 +525,84 @@ impl Parser {
     }
 
     fn parse_parameter_list(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        if self.tokens[self.index].token == Token::CloseParen {
+            let mut empty_parameter_list = self.generate_indent();
+            writeln!(empty_parameter_list, "<{:?}>", ParseTag::ParameterList)
+                .expect("Failed to write <ParameterList>.");
+            empty_parameter_list.push_str(&self.generate_indent());
+            writeln!(empty_parameter_list, "</{:?}>", ParseTag::ParameterList)
+                .expect("Failed to write </ParameterList>.");
+            return Ok(empty_parameter_list);
+        }
+
+        let mut parameter_list_parse_tree = self.generate_indent();
+        writeln!(parameter_list_parse_tree, "<{:?}>", ParseTag::ParameterList)
+            .expect("Failed to write <ParameterList>.");
+
+        self.indent_amount += 2;
+
+        if !self.tokens[self.index].token.is_type() {
+            return Err(JackError::new(
+                // FIXME: Create ErrorType for this. (MissingType?)
+                ErrorType::GeneralError,
+                "Expected type of var in parameter list.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        parameter_list_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if self.tokens[self.index].token != Token::Identifier {
+            return Err(JackError::new(
+                ErrorType::MissingIdentifier,
+                "Expected identifier in parameter list.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        parameter_list_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        // Handle parameter lists that have multiple parameters.
+        while self.tokens[self.index].token != Token::CloseParen {
+            if self.tokens[self.index].token == Token::Comma
+                && self.peek().token.is_type()
+                && self.peek_k(2).token == Token::Identifier
+            {
+                parameter_list_parse_tree.push_str(&self.generate_xml_tag());
+                self.index += 1;
+                parameter_list_parse_tree.push_str(&self.generate_xml_tag());
+                self.index += 1;
+                parameter_list_parse_tree.push_str(&self.generate_xml_tag());
+            } else {
+                return Err(JackError::new(
+                    // FIXME: Create ErrorType for this. (BadParameterList?)
+                    ErrorType::GeneralError,
+                    "Expected sequence of ', type VarName' in non-empty parameter list.",
+                    Some(self.tokens[self.index].path.clone()),
+                    Some(self.tokens[self.index].line),
+                    Some(self.tokens[self.index].column),
+                ));
+            }
+            self.index += 1;
+        }
+
+        self.indent_amount -= 2;
+
+        parameter_list_parse_tree.push_str(&self.generate_indent());
+        writeln!(
+            parameter_list_parse_tree,
+            "</{:?}>",
+            ParseTag::ParameterList
+        )
+        .expect("Failed to write </ParameterList>.");
+
+        Ok(parameter_list_parse_tree)
     }
 
     fn parse_var_dec(&mut self) -> Result<String, JackError> {
