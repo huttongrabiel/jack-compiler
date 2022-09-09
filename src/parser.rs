@@ -254,7 +254,7 @@ impl Parser {
 
     fn parse_class_var_dec(&mut self) -> Result<String, JackError> {
         if self.tokens[self.index].token != Token::Field
-            || self.tokens[self.index].token != Token::Static
+            && self.tokens[self.index].token != Token::Static
         {
             // Classes do not require having variable declarations.
             return Ok(String::from(""));
