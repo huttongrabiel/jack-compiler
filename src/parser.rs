@@ -225,6 +225,9 @@ impl Parser {
                 Some(self.tokens[self.index].column),
             ));
         }
+
+        class_parse_tree.push_str(&self.generate_xml_tag());
+
         self.index += 1;
 
         if self.tokens[self.index].token != Token::OpenCurly {
@@ -236,6 +239,8 @@ impl Parser {
                 Some(self.tokens[self.index].column),
             ));
         }
+
+        class_parse_tree.push_str(&self.generate_xml_tag());
 
         // Move to the first token of the body of the class.
         self.index += 1;
