@@ -315,6 +315,24 @@ impl Parser {
     fn parse_expression_list(&mut self) -> Result<String, JackError> {
         Ok(String::from("PLACEHOLDER"))
     }
+
+    fn generate_xml_tag(&self, token: TokenData) -> String {
+        let mut xml_tag = String::new();
+
+        xml_tag.push_str(&self.generate_indent());
+        xml_tag.push_str(format!("<{:?}>", token.token_type).as_str());
+        xml_tag.push_str(
+            token
+                .token_str
+                .as_ref()
+                .unwrap_or(&format!("{:?}", token.token))
+                .as_str(),
+        );
+        xml_tag.push_str(format!("</{:?}>\n", token.token_type).as_str());
+
+        xml_tag
+    }
+
     fn generate_indent(&self) -> String {
         " ".repeat(self.indent_amount)
     }
