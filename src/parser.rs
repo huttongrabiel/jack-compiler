@@ -1,6 +1,7 @@
 use crate::error::{ErrorType, JackError};
 use crate::lexer::{Token, TokenData, TokenType};
 
+#[derive(Debug)]
 pub enum ParseTag {
     // 'class' className '{' ClassVarDec* SubroutineDec* '}'
     Class,
