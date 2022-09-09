@@ -211,10 +211,8 @@ impl Parser {
     fn parse_class(&mut self) -> Result<String, JackError> {
         let mut class_parse_tree = String::from("<class>\n");
 
-        class_parse_tree
-            .push_str(&self.generate_xml_tag(&self.current_token()));
-
         self.indent_amount += 2;
+        class_parse_tree.push_str(&self.generate_xml_tag());
 
         self.index += 1;
 
@@ -326,7 +324,9 @@ impl Parser {
         Ok(String::from("PLACEHOLDER"))
     }
 
-    fn generate_xml_tag(&self, token: &TokenData) -> String {
+    fn generate_xml_tag(&self) -> String {
+        let token = self.current_token();
+
         let mut xml_tag = String::new();
 
         xml_tag.push_str(&self.generate_indent());
