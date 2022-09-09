@@ -278,7 +278,85 @@ impl Parser {
             return Ok(String::from(""));
         }
 
-        Ok(String::from("PLACEHOLDER"))
+        let mut cvd_parse_tree = self.generate_indent();
+        cvd_parse_tree.push_str(&format!("<{:?}>\n", ParseTag::ClassVarDec));
+
+        self.indent_amount += 2;
+
+        assert!(
+            self.current_token().token == Token::Field
+                || self.current_token().token == Token::Static
+        );
+
+        cvd_parse_tree.push_str(&self.generate_xml_tag());
+
+        self.index += 1;
+
+        match self.tokens[self.index].token {
+            Token::Int | Token::Char | Token::Boolean | Token::Identifier => {
+                cvd_parse_tree.push_str(&self.generate_xml_tag())
+            }
+            _ => {
+                return Err(JackError::new(
+                    ErrorType::GeneralError,
+                    "Expected type.",
+                    Some(self.tokens[self.index].path.clone()),
+                    Some(self.tokens[self.index].line),
+                    Some(self.tokens[self.index].column),
+                ))
+            }
+        };
+
+        self.index += 1;
+
+        if self.tokens[self.index].token != Token::Identifier {
+            return Err(JackError::new(
+                ErrorType::GeneralError,
+                "Expected variable name.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        cvd_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        while self.tokens[self.index].token != Token::Semicolon {
+            if self.tokens[self.index].token == Token::Comma
+                && self.peek().token == Token::Identifier
+            {
+                cvd_parse_tree.push_str(&self.generate_xml_tag());
+                self.index += 1;
+                cvd_parse_tree.push_str(&self.generate_xml_tag());
+            } else {
+                return Err(JackError::new(
+                    ErrorType::GeneralError,
+                    "Expected sequence of ', VarName' for single line multi variable declaration.",
+                    Some(self.tokens[self.index].path.clone()),
+                    Some(self.tokens[self.index].line),
+                    Some(self.tokens[self.index].column),
+                ));
+            }
+            self.index += 1;
+        }
+
+        cvd_parse_tree.push_str(&self.generate_xml_tag());
+
+        // Move past SemiColon.
+        self.index += 1;
+        self.indent_amount -= 2;
+
+        cvd_parse_tree.push_str(&self.generate_indent());
+        cvd_parse_tree.push_str(&format!("</{:?}>\n", ParseTag::ClassVarDec));
+
+        if self.tokens[self.index].token == Token::Static
+            || self.tokens[self.index].token == Token::Field
+        {
+            cvd_parse_tree.push_str(&self.parse_class_var_dec()?);
+        }
+
+        Ok(cvd_parse_tree)
     }
 
     // Subroutine can be a method, function, or constructor
