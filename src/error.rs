@@ -13,6 +13,7 @@ pub enum ErrorType {
     IOError,
     InvalidInteger,
     GeneralError,
+    MissingIdentifier,
 }
 
 impl Display for ErrorType {
@@ -26,6 +27,7 @@ impl Display for ErrorType {
             ErrorType::IOError => write!(f, "IOError"),
             ErrorType::InvalidInteger => write!(f, "InvalidInteger"),
             ErrorType::GeneralError => write!(f, "GeneralError"),
+            ErrorType::MissingIdentifier => write!(f, "MissingIdentifier"),
         }
     }
 }
