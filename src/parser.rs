@@ -1,5 +1,6 @@
 use crate::error::{ErrorType, JackError};
 use crate::lexer::{Token, TokenData, TokenType};
+use std::fmt::Write;
 
 #[derive(Debug)]
 pub enum ParseTag {
@@ -279,7 +280,8 @@ impl Parser {
         }
 
         let mut cvd_parse_tree = self.generate_indent();
-        cvd_parse_tree.push_str(&format!("<{:?}>\n", ParseTag::ClassVarDec));
+        writeln!(cvd_parse_tree, "<{:?}>", ParseTag::ClassVarDec)
+            .expect("Failed to write cvd_parse_tree.");
 
         self.indent_amount += 2;
 
@@ -348,7 +350,8 @@ impl Parser {
         self.indent_amount -= 2;
 
         cvd_parse_tree.push_str(&self.generate_indent());
-        cvd_parse_tree.push_str(&format!("</{:?}>\n", ParseTag::ClassVarDec));
+        writeln!(cvd_parse_tree, "</{:?}>", ParseTag::ClassVarDec)
+            .expect("Failed to write cvd_parse_tree.");
 
         if self.tokens[self.index].token == Token::Static
             || self.tokens[self.index].token == Token::Field
@@ -418,7 +421,7 @@ impl Parser {
         let mut xml_tag = String::new();
 
         xml_tag.push_str(&self.generate_indent());
-        xml_tag.push_str(format!("<{:?}>", token.token_type).as_str());
+        write!(xml_tag, "<{:?}>", token.token_type).expect("Failed to write to xml_tag.");
         xml_tag.push_str(
             token
                 .token_str
@@ -426,7 +429,7 @@ impl Parser {
                 .unwrap_or(&format!("{:?}", token.token))
                 .as_str(),
         );
-        xml_tag.push_str(format!("</{:?}>\n", token.token_type).as_str());
+        writeln!(xml_tag, "</{:?}>", token.token_type).expect("Failed to write to xml_tag.");
 
         xml_tag
     }
