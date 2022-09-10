@@ -331,24 +331,17 @@ impl Parser {
         cvd_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        while self.tokens[self.index].token != Token::Semicolon {
-            if self.tokens[self.index].token == Token::Comma
-                && self.peek().token == Token::Identifier
-            {
-                cvd_parse_tree.push_str(&self.generate_xml_tag());
-                self.index += 1;
-                cvd_parse_tree.push_str(&self.generate_xml_tag());
-            } else {
-                return Err(JackError::new(
-                    // FIXME: Add ErrorType for this. (BadMultiVariableDeclaration?)
-                    ErrorType::GeneralError,
-                    "Expected sequence of ', VarName' for single line multi variable declaration.",
-                    Some(self.tokens[self.index].path.clone()),
-                    Some(self.tokens[self.index].line),
-                    Some(self.tokens[self.index].column),
-                ));
-            }
-            self.index += 1;
+        cvd_parse_tree.push_str(&self.parse_multi_variable_declaration()?);
+
+        if self.tokens[self.index].token != Token::Semicolon {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedSemicolon)
+                ErrorType::GeneralError,
+                "Expected ';'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
         }
 
         cvd_parse_tree.push_str(&self.generate_xml_tag());
@@ -607,6 +600,40 @@ impl Parser {
 
     fn parse_var_dec(&mut self) -> Result<String, JackError> {
         Ok(String::from("PLACEHOLDER"))
+    }
+
+    /// Multi variable declarations are variable declarations that happen on a single line.
+    ///
+    /// Example:
+    ///     ```var int foo, bar, baz;```
+    ///
+    /// This function gets called after it has been checked that a 'var int foo'
+    /// exists. It then gets called and continues parsing until it encounters a
+    /// semi colon at which point it returns its parse tree.
+    fn parse_multi_variable_declaration(&mut self) -> Result<String, JackError> {
+        let mut multi_variable_declaration_parse_tree = String::new();
+
+        while self.tokens[self.index].token != Token::Semicolon {
+            if self.tokens[self.index].token == Token::Comma
+                && self.peek().token == Token::Identifier
+            {
+                multi_variable_declaration_parse_tree.push_str(&self.generate_xml_tag());
+                self.index += 1;
+                multi_variable_declaration_parse_tree.push_str(&self.generate_xml_tag());
+            } else {
+                return Err(JackError::new(
+                    // FIXME: Add ErrorType for this. (BadMultiVariableDeclaration?)
+                    ErrorType::GeneralError,
+                    "Expected sequence of ', VarName' for single line multi variable declaration.",
+                    Some(self.tokens[self.index].path.clone()),
+                    Some(self.tokens[self.index].line),
+                    Some(self.tokens[self.index].column),
+                ));
+            }
+            self.index += 1;
+        }
+
+        Ok(multi_variable_declaration_parse_tree)
     }
 
     fn parse_statements(&mut self) -> Result<String, JackError> {
