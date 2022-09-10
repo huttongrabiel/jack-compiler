@@ -704,43 +704,43 @@ impl Parser {
     }
 
     fn parse_statements(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        Ok(String::from(""))
     }
 
     fn parse_do(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        Ok(String::from(""))
     }
 
     fn parse_let(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        Ok(String::from(""))
     }
 
     fn parse_while(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        Ok(String::from(""))
     }
 
     fn parse_return(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        Ok(String::from(""))
     }
 
     fn parse_if(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        Ok(String::from(""))
     }
 
     fn parse_expression(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        Ok(String::from(""))
     }
 
     // Will require a peek() function to see type of next token. This is to
     // distinguish between foo, foo[i], foo.print(), etc.
     fn parse_term(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        Ok(String::from(""))
     }
 
     // Expression lists are lists of expressions separated by commas. They CAN
     // be empty.
     fn parse_expression_list(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        Ok(String::from(""))
     }
 
     fn generate_xml_tag(&self) -> String {
