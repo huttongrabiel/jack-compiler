@@ -599,7 +599,74 @@ impl Parser {
     }
 
     fn parse_var_dec(&mut self) -> Result<String, JackError> {
-        Ok(String::from("PLACEHOLDER"))
+        // VarDec is optional is subroutine body.
+        if self.tokens[self.index].token != Token::Var {
+            return Ok(String::from(""));
+        }
+
+        let mut var_dec_parse_tree = self.generate_indent();
+        writeln!(var_dec_parse_tree, "<{:?}>", ParseTag::VarDec)
+            .expect("Failed to write <VarDec>.");
+
+        self.indent_amount += 2;
+
+        var_dec_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if !self.tokens[self.index].token.is_type() {
+            return Err(JackError::new(
+                // FIXME: Create ErrorType for this. (ExpectedTypeToken?)
+                ErrorType::GeneralError,
+                "Expected type in variable declaration.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        var_dec_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if self.tokens[self.index].token != Token::Identifier {
+            return Err(JackError::new(
+                ErrorType::MissingIdentifier,
+                "Expected identifer in variable declaration. 'var type _identifer_ ...'",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        var_dec_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        var_dec_parse_tree.push_str(&self.parse_multi_variable_declaration()?);
+
+        if self.tokens[self.index].token != Token::Semicolon {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedSemicolon)
+                ErrorType::GeneralError,
+                "Expected ';'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        var_dec_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        self.indent_amount -= 2;
+
+        var_dec_parse_tree.push_str(&self.generate_indent());
+        writeln!(var_dec_parse_tree, "</{:?}>", ParseTag::VarDec)
+            .expect("Failed to write </VarDec>.");
+
+        if self.tokens[self.index].token == Token::Var {
+            var_dec_parse_tree.push_str(&self.parse_var_dec()?);
+        }
+
+        Ok(var_dec_parse_tree)
     }
 
     /// Multi variable declarations are variable declarations that happen on a single line.
