@@ -63,6 +63,13 @@ impl Token {
             Token::Int | Token::Char | Token::Boolean | Token::Identifier
         )
     }
+
+    pub fn is_statement_keyword(&self) -> bool {
+        matches!(
+            self,
+            Token::Let | Token::If | Token::While | Token::Do | Token::Return
+        )
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
