@@ -704,7 +704,43 @@ impl Parser {
     }
 
     fn parse_statements(&mut self) -> Result<String, JackError> {
-        Ok(String::from(""))
+        // At the minimum a 'return;' statement is required.
+        if self.tokens[self.index].token == Token::CloseCurly {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (MissingReturn?)
+                ErrorType::GeneralError,
+                "All subroutines, even blank ones, must return. Try adding \"return;\"",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        let mut statement_parse_tree = String::new();
+
+        match self.tokens[self.index].token {
+            Token::Let => statement_parse_tree.push_str(&self.parse_let()?),
+            Token::If => statement_parse_tree.push_str(&self.parse_if()?),
+            Token::While => statement_parse_tree.push_str(&self.parse_while()?),
+            Token::Do => statement_parse_tree.push_str(&self.parse_do()?),
+            Token::Return => statement_parse_tree.push_str(&self.parse_return()?),
+            _ => {
+                return Err(JackError::new(
+                    // FIXME: Add ErrorType for this. (UnexpectedToken?)
+                    ErrorType::GarbageToken,
+                    "Unexpected token in subroutine body.",
+                    Some(self.tokens[self.index].path.clone()),
+                    Some(self.tokens[self.index].line),
+                    Some(self.tokens[self.index].column),
+                ));
+            }
+        };
+
+        if self.tokens[self.index].token.is_statement_keyword() {
+            statement_parse_tree.push_str(&self.parse_statements()?);
+        }
+
+        Ok(statement_parse_tree)
     }
 
     fn parse_do(&mut self) -> Result<String, JackError> {
