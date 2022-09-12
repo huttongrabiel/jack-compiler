@@ -710,7 +710,7 @@ impl Parser {
             let_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
 
-            let_parse_tree.push_str(&self.parse_do()?);
+            let_parse_tree.push_str(&self.parse_expression()?);
 
             if self.tokens[self.index].token != Token::CloseBracket {
                 return Err(JackError::new(
@@ -741,7 +741,7 @@ impl Parser {
         let_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        let_parse_tree.push_str(&self.parse_do()?);
+        let_parse_tree.push_str(&self.parse_expression()?);
 
         if self.tokens[self.index].token != Token::Semicolon {
             return Err(JackError::new(
