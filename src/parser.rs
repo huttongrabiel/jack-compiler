@@ -1027,7 +1027,37 @@ impl Parser {
     // Will require a peek() function to see type of next token. This is to
     // distinguish between foo, foo[i], foo.print(), etc.
     fn parse_term(&mut self) -> Result<String, JackError> {
-        Ok(String::from(""))
+        let mut term_parse_tree = self.generate_indent();
+
+        writeln!(term_parse_tree, "<{:?}>", ParseTag::Term).expect("Failed to write <Term>.");
+        self.indent_amount += 2;
+
+        if matches!(
+            self.current_token().token,
+            Token::IntegerConstant | Token::StringConstant | Token::Minus | Token::Tilde
+        ) || self.current_token().token.is_keyword_constant()
+        {
+            term_parse_tree.push_str(&self.generate_xml_tag());
+            self.index += 1;
+        } else if self.current_token().token == Token::Identifier {
+            if self.peek().token == Token::OpenBracket {
+                while self.current_token().token != Token::CloseBracket {
+                    term_parse_tree.push_str(&self.generate_xml_tag());
+                    self.index += 1;
+                }
+                // Add the closing bracket to the parse tree.
+                term_parse_tree.push_str(&self.generate_xml_tag());
+                self.index += 1;
+            } else if self.peek().token == Token::OpenParen || self.peek().token == Token::Dot {
+                term_parse_tree.push_str(&self.parse_subroutine_call()?);
+            }
+        }
+
+        self.indent_amount -= 2;
+        term_parse_tree.push_str(&self.generate_indent());
+        writeln!(term_parse_tree, "</{:?}>", ParseTag::Term).expect("Failed to write </Term>.");
+
+        Ok(term_parse_tree)
     }
 
     // Expression lists are lists of expressions separated by commas. They CAN
