@@ -220,6 +220,11 @@ impl Parser {
         &self.tokens[self.index + k]
     }
 
+    fn peek_behind(&self) -> &TokenData {
+        assert!(self.index > 0);
+        &self.tokens[self.index - 1]
+    }
+
     fn parse_class(&mut self) -> Result<String, JackError> {
         let mut class_parse_tree = String::from("<class>\n");
 
