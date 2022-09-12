@@ -914,6 +914,7 @@ impl Parser {
         // to parse the else.
         if self.current_token().token != Token::Else {
             self.indent_amount -= 2;
+            if_parse_tree.push_str(&self.generate_indent());
             writeln!(if_parse_tree, "</{:?}>", ParseTag::IfStatement)
                 .expect("Failed to write </IfStatement>.");
             return Ok(if_parse_tree);
@@ -953,6 +954,7 @@ impl Parser {
         self.index += 1;
 
         self.indent_amount -= 2;
+        if_parse_tree.push_str(&self.generate_indent());
         writeln!(if_parse_tree, "</{:?}>", ParseTag::IfStatement)
             .expect("Failed to write </IfStatement>.");
 
