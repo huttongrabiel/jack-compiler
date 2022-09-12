@@ -1105,6 +1105,19 @@ impl Parser {
         if self.current_token().token == Token::Dot {
             subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
+
+            if self.current_token().token != Token::Identifier {
+                return Err(JackError::new(
+                    ErrorType::MissingIdentifier,
+                    "Expected identifer for class method. Class.identifier(..).",
+                    Some(self.current_token().path.clone()),
+                    Some(self.current_token().line),
+                    Some(self.current_token().column),
+                ));
+            }
+
+            subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
+            self.index += 1;
         }
 
         if self.current_token().token != Token::OpenParen {
