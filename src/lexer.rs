@@ -85,6 +85,10 @@ impl Token {
                 | Token::Equal
         )
     }
+
+    pub fn is_keyword_constant(&self) -> bool {
+        matches!(self, Token::True | Token::False | Token::Null | Token::This)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
