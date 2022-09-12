@@ -1001,7 +1001,26 @@ impl Parser {
     }
 
     fn parse_expression(&mut self) -> Result<String, JackError> {
-        Ok(String::from(""))
+        let mut expression_parse_tree = self.generate_indent();
+
+        writeln!(expression_parse_tree, "<{:?}>", ParseTag::Expression)
+            .expect("Failed to write <Expression>.");
+        self.indent_amount += 2;
+
+        expression_parse_tree.push_str(&self.parse_term()?);
+
+        if self.current_token().token.is_op() {
+            expression_parse_tree.push_str(&self.generate_xml_tag());
+            self.index += 1;
+            expression_parse_tree.push_str(&self.parse_term()?);
+        }
+
+        self.indent_amount -= 2;
+        expression_parse_tree.push_str(&self.generate_indent());
+        writeln!(expression_parse_tree, "</{:?}>", ParseTag::Expression)
+            .expect("Failed to write </Expression>.");
+
+        Ok(expression_parse_tree)
     }
 
     // Will require a peek() function to see type of next token. This is to
