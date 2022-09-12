@@ -1064,6 +1064,52 @@ impl Parser {
         Ok(String::from(""))
     }
 
+    fn parse_subroutine_call(&mut self) -> Result<String, JackError> {
+        // Add the identifier to the parse tree. If we call this function we are
+        // guaranteed to be on an identifier.
+        let mut subroutine_call_parse_tree = self.generate_xml_tag();
+
+        self.index += 1;
+
+        // Will only occur if subroutine is a method of a class.
+        if self.current_token().token == Token::Dot {
+            subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
+            self.index += 1;
+        }
+
+        if self.current_token().token != Token::OpenParen {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (UnexpectedToken)
+                ErrorType::GeneralError,
+                "Expected '(' in subroutine call.",
+                Some(self.current_token().path.clone()),
+                Some(self.current_token().line),
+                Some(self.current_token().column),
+            ));
+        }
+
+        subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        subroutine_call_parse_tree.push_str(&self.parse_expression_list()?);
+
+        if self.current_token().token != Token::CloseParen {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (UnexpectedToken)
+                ErrorType::GeneralError,
+                "Expected ')' in subroutine call.",
+                Some(self.current_token().path.clone()),
+                Some(self.current_token().line),
+                Some(self.current_token().column),
+            ));
+        }
+
+        subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        Ok(subroutine_call_parse_tree)
+    }
+
     fn generate_xml_tag(&self) -> String {
         let token = self.current_token();
 
