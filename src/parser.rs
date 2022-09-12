@@ -844,7 +844,41 @@ impl Parser {
     }
 
     fn parse_return(&mut self) -> Result<String, JackError> {
-        Ok(String::from(""))
+        let mut return_parse_tree = self.generate_indent();
+
+        writeln!(return_parse_tree, "<{:?}>", ParseTag::ReturnStatement)
+            .expect("Failed to write <ReturnStatement>.");
+        self.indent_amount += 2;
+
+        // Add the 'return' keyword to the parse tree.
+        return_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if self.current_token().token != Token::Semicolon {
+            return_parse_tree.push_str(&self.parse_expression()?);
+        }
+
+        // NOW we should be on a semicolon.
+        if self.current_token().token != Token::Semicolon {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedSemicolon)
+                ErrorType::GeneralError,
+                "Expected ';'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        return_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        self.indent_amount -= 2;
+        return_parse_tree.push_str(&self.generate_indent());
+        writeln!(return_parse_tree, "</{:?}>", ParseTag::ReturnStatement)
+            .expect("Failed to write </ReturnStatement>.");
+
+        Ok(return_parse_tree)
     }
 
     fn parse_if(&mut self) -> Result<String, JackError> {
