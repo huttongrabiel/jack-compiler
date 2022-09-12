@@ -70,6 +70,21 @@ impl Token {
             Token::Let | Token::If | Token::While | Token::Do | Token::Return
         )
     }
+
+    pub fn is_op(&self) -> bool {
+        matches!(
+            self,
+            Token::Plus
+                | Token::Minus
+                | Token::Asterik
+                | Token::BackSlash
+                | Token::Ampersand
+                | Token::Pipe
+                | Token::LessThan
+                | Token::GreaterThan
+                | Token::Equal
+        )
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
