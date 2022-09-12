@@ -758,8 +758,12 @@ impl Parser {
         let mut let_parse_tree = self.generate_indent();
 
         writeln!(let_parse_tree, "<{:?}>", ParseTag::LetStatement)
-            .expect("Failed to write <LetStatement.");
+            .expect("Failed to write <LetStatement>.");
 
+        self.indent_amount += 2;
+
+        // Adds the XML for 'let' onto the parse tree. If we are at this point
+        // in the function, we are on a let, so we don't need to check it.
         let_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
