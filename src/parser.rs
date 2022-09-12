@@ -831,11 +831,90 @@ impl Parser {
         let_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
+        self.indent_amount -= 2;
+        writeln!(let_parse_tree, "</{:?}>", ParseTag::LetStatement)
+            .expect("Failed to write </LetStatement>.");
+
         Ok(let_parse_tree)
     }
 
     fn parse_while(&mut self) -> Result<String, JackError> {
-        Ok(String::from(""))
+        let mut while_parse_tree = self.generate_indent();
+
+        writeln!(while_parse_tree, "<{:?}>", ParseTag::WhileStatement)
+            .expect("Failed to write <WhileStatement>.");
+        self.indent_amount += 2;
+
+        // Add the tag for 'while' onto the parse tree.
+        while_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if self.current_token().token != Token::OpenParen {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedOpenCurly?)
+                ErrorType::GeneralError,
+                "Expected '('.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        while_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        while_parse_tree.push_str(&self.parse_expression()?);
+
+        if self.current_token().token != Token::CloseParen {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedOpenCurly?)
+                ErrorType::GeneralError,
+                "Expected ')'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        while_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if self.current_token().token != Token::OpenCurly {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedOpenCurly?)
+                ErrorType::GeneralError,
+                "Expected '{'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        while_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        while_parse_tree.push_str(&self.parse_statements()?);
+
+        if self.current_token().token != Token::CloseCurly {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedOpenCurly?)
+                ErrorType::GeneralError,
+                "Expected '}'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        while_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        self.indent_amount -= 2;
+        while_parse_tree.push_str(&self.generate_indent());
+        writeln!(while_parse_tree, "</{:?}>", ParseTag::WhileStatement)
+            .expect("Failed to write </WhileStatement>.");
+
+        Ok(while_parse_tree)
     }
 
     fn parse_return(&mut self) -> Result<String, JackError> {
