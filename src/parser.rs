@@ -216,7 +216,7 @@ impl Parser {
     }
 
     fn peek_k(&self, k: usize) -> &TokenData {
-        assert!(self.index + 2 < self.tokens.len());
+        assert!(self.index + k < self.tokens.len());
         &self.tokens[self.index + k]
     }
 
