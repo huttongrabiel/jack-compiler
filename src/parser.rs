@@ -1033,6 +1033,34 @@ impl Parser {
     // Expression lists are lists of expressions separated by commas. They CAN
     // be empty.
     fn parse_expression_list(&mut self) -> Result<String, JackError> {
+        let mut expression_list_parse_tree = self.generate_indent();
+
+        writeln!(
+            expression_list_parse_tree,
+            "<{:?}>",
+            ParseTag::ExpressionList
+        )
+        .expect("Failed to write <ExpressionList>.");
+        self.indent_amount += 2;
+
+        while self.current_token().token != Token::CloseParen {
+            expression_list_parse_tree.push_str(&self.parse_expression()?);
+
+            if self.current_token().token == Token::Comma {
+                self.index += 1;
+                expression_list_parse_tree.push_str(&self.parse_expression()?);
+            }
+        }
+
+        self.indent_amount -= 2;
+        expression_list_parse_tree.push_str(&self.generate_indent());
+        writeln!(
+            expression_list_parse_tree,
+            "</{:?}>",
+            ParseTag::ExpressionList
+        )
+        .expect("Failed to write </ExpressionList>.");
+
         Ok(String::from(""))
     }
 
