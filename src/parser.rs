@@ -643,7 +643,41 @@ impl Parser {
     }
 
     fn parse_do(&mut self) -> Result<String, JackError> {
-        Ok(String::from(""))
+        let mut do_parse_tree = self.generate_indent();
+
+        writeln!(do_parse_tree, "<{:?}>", ParseTag::DoStatement)
+            .expect("Failed to write <DoStatement>.");
+        self.indent_amount += 2;
+
+        // Add the XML tag for 'do' to the parse tree.
+        do_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        // In this case, parse_expression should parse a SubroutineCall.
+        // It should see a term, that term should then be recognized as
+        // a SubroutineCall and then the SubroutineCall should be parsed.
+        do_parse_tree.push_str(&self.parse_expression()?);
+
+        if self.current_token().token != Token::Semicolon {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedSemicolon)
+                ErrorType::GeneralError,
+                "Expected ';'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        do_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        self.indent_amount -= 2;
+        do_parse_tree.push_str(&self.generate_indent());
+        writeln!(do_parse_tree, "</{:?}>", ParseTag::DoStatement)
+            .expect("Failed to write </DoStatement>.");
+
+        Ok(do_parse_tree)
     }
 
     fn parse_let(&mut self) -> Result<String, JackError> {
