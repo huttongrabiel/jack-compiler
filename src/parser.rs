@@ -1041,15 +1041,15 @@ impl Parser {
             self.index += 1;
         } else if self.current_token().token == Token::Identifier {
             if self.peek().token == Token::OpenBracket {
-                while self.current_token().token != Token::CloseBracket {
-                    term_parse_tree.push_str(&self.generate_xml_tag());
-                    self.index += 1;
-                }
+                term_parse_tree.push_str(&self.parse_expression()?);
                 // Add the closing bracket to the parse tree.
                 term_parse_tree.push_str(&self.generate_xml_tag());
                 self.index += 1;
             } else if self.peek().token == Token::OpenParen || self.peek().token == Token::Dot {
                 term_parse_tree.push_str(&self.parse_subroutine_call()?);
+            } else {
+                term_parse_tree.push_str(&self.generate_xml_tag());
+                self.index += 1;
             }
         }
 
