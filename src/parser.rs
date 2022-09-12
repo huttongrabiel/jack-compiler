@@ -839,7 +839,120 @@ impl Parser {
     }
 
     fn parse_if(&mut self) -> Result<String, JackError> {
-        Ok(String::from(""))
+        let mut if_parse_tree = self.generate_indent();
+
+        writeln!(if_parse_tree, "<{:?}>", ParseTag::IfStatement)
+            .expect("Failed to write <IfStatement>.");
+
+        self.indent_amount += 2;
+
+        if self.tokens[self.index].token != Token::OpenParen {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedOpenParen?)
+                ErrorType::GeneralError,
+                "Expected '('.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        if_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if_parse_tree.push_str(&self.parse_expression()?);
+
+        if self.tokens[self.index].token != Token::CloseParen {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedCloseParen?)
+                ErrorType::GeneralError,
+                "Expected ')'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        if_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if self.tokens[self.index].token != Token::OpenCurly {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedOpenCurly?)
+                ErrorType::GeneralError,
+                "Expected '{'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        if_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if_parse_tree.push_str(&self.parse_statements()?);
+
+        if self.current_token().token != Token::CloseCurly {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedCloseCurly?)
+                ErrorType::GeneralError,
+                "Expected '}'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        if_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        // If there is no else, the function ends here. Otherwise it continues
+        // to parse the else.
+        if self.current_token().token != Token::Else {
+            self.indent_amount -= 2;
+            writeln!(if_parse_tree, "</{:?}>", ParseTag::IfStatement)
+                .expect("Failed to write </IfStatement>.");
+            return Ok(if_parse_tree);
+        }
+
+        if_parse_tree.push_str(&&self.generate_xml_tag());
+        self.index += 1;
+
+        if self.tokens[self.index].token != Token::OpenCurly {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedOpenCurly?)
+                ErrorType::GeneralError,
+                "Expected '{'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        if_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        if_parse_tree.push_str(&self.parse_statements()?);
+
+        if self.current_token().token != Token::CloseCurly {
+            return Err(JackError::new(
+                // FIXME: Add ErrorType for this. (ExpectedCloseCurly?)
+                ErrorType::GeneralError,
+                "Expected '}'.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        }
+
+        if_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
+
+        self.indent_amount -= 2;
+        writeln!(if_parse_tree, "</{:?}>", ParseTag::IfStatement)
+            .expect("Failed to write </IfStatement>.");
+
+        Ok(if_parse_tree)
     }
 
     fn parse_expression(&mut self) -> Result<String, JackError> {
