@@ -758,6 +758,7 @@ impl Parser {
         self.index += 1;
 
         self.indent_amount -= 2;
+        let_parse_tree.push_str(&self.generate_indent());
         writeln!(let_parse_tree, "</{:?}>", ParseTag::LetStatement)
             .expect("Failed to write </LetStatement>.");
 
