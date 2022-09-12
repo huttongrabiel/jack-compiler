@@ -959,7 +959,7 @@ impl Parser {
             return Ok(if_parse_tree);
         }
 
-        if_parse_tree.push_str(&&self.generate_xml_tag());
+        if_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
         if self.tokens[self.index].token != Token::OpenCurly {
