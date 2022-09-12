@@ -710,7 +710,9 @@ impl Parser {
 
     fn parse_statements(&mut self) -> Result<String, JackError> {
         // At the minimum a 'return;' statement is required.
-        if self.tokens[self.index].token == Token::CloseCurly {
+        if self.tokens[self.index].token == Token::CloseCurly
+            && self.peek_behind().token == Token::OpenCurly
+        {
             return Err(JackError::new(
                 // FIXME: Add ErrorType for this. (MissingReturn?)
                 ErrorType::GeneralError,
