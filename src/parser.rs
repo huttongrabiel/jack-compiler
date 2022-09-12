@@ -887,8 +887,10 @@ impl Parser {
 
         writeln!(if_parse_tree, "<{:?}>", ParseTag::IfStatement)
             .expect("Failed to write <IfStatement>.");
-
         self.indent_amount += 2;
+
+        if_parse_tree.push_str(&self.generate_xml_tag());
+        self.index += 1;
 
         if self.tokens[self.index].token != Token::OpenParen {
             return Err(JackError::new(
