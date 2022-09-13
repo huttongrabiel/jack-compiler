@@ -615,29 +615,36 @@ impl Parser {
             ));
         }
 
-        let mut statement_parse_tree = String::new();
+        let mut statement_parse_tree = self.generate_indent();
 
-        match self.tokens[self.index].token {
-            Token::Let => statement_parse_tree.push_str(&self.parse_let()?),
-            Token::If => statement_parse_tree.push_str(&self.parse_if()?),
-            Token::While => statement_parse_tree.push_str(&self.parse_while()?),
-            Token::Do => statement_parse_tree.push_str(&self.parse_do()?),
-            Token::Return => statement_parse_tree.push_str(&self.parse_return()?),
-            _ => {
-                return Err(JackError::new(
-                    // FIXME: Add ErrorType for this. (UnexpectedToken?)
-                    ErrorType::GarbageToken,
-                    "Unexpected token in subroutine body.",
-                    Some(self.tokens[self.index].path.clone()),
-                    Some(self.tokens[self.index].line),
-                    Some(self.tokens[self.index].column),
-                ));
-            }
-        };
+        writeln!(statement_parse_tree, "<{:?}>", ParseTag::Statements)
+            .expect("Failed to write <Statements>.");
+        self.indent_amount += 2;
 
-        if self.tokens[self.index].token.is_statement_keyword() {
-            statement_parse_tree.push_str(&self.parse_statements()?);
+        while self.current_token().token.is_statement_keyword() {
+            match self.tokens[self.index].token {
+                Token::Let => statement_parse_tree.push_str(&self.parse_let()?),
+                Token::If => statement_parse_tree.push_str(&self.parse_if()?),
+                Token::While => statement_parse_tree.push_str(&self.parse_while()?),
+                Token::Do => statement_parse_tree.push_str(&self.parse_do()?),
+                Token::Return => statement_parse_tree.push_str(&self.parse_return()?),
+                _ => {
+                    return Err(JackError::new(
+                        // FIXME: Add ErrorType for this. (UnexpectedToken?)
+                        ErrorType::GarbageToken,
+                        "Unexpected token in subroutine body.",
+                        Some(self.tokens[self.index].path.clone()),
+                        Some(self.tokens[self.index].line),
+                        Some(self.tokens[self.index].column),
+                    ));
+                }
+            };
         }
+
+        self.indent_amount -= 2;
+        statement_parse_tree.push_str(&self.generate_indent());
+        writeln!(statement_parse_tree, "</{:?}>", ParseTag::Statements)
+            .expect("Failed to write </Statements>.");
 
         Ok(statement_parse_tree)
     }
