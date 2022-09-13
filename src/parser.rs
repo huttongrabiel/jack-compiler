@@ -913,7 +913,11 @@ impl Parser {
         if_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        if_parse_tree.push_str(&self.parse_expression()?);
+        while !(self.current_token().token == Token::CloseParen
+            && self.peek().token == Token::OpenCurly)
+        {
+            if_parse_tree.push_str(&self.parse_expression()?);
+        }
 
         if self.tokens[self.index].token != Token::CloseParen {
             return Err(JackError::new(
@@ -1022,7 +1026,7 @@ impl Parser {
         if self.current_token().token.is_op() {
             expression_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
-            expression_parse_tree.push_str(&self.parse_term()?);
+            expression_parse_tree.push_str(&self.parse_expression()?);
         }
 
         self.indent_amount -= 2;
@@ -1060,6 +1064,9 @@ impl Parser {
                 term_parse_tree.push_str(&self.generate_xml_tag());
                 self.index += 1;
             }
+        } else {
+            term_parse_tree.push_str(&self.generate_xml_tag());
+            self.index += 1;
         }
 
         self.indent_amount -= 2;
