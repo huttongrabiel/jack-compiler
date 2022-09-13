@@ -1,33 +1,39 @@
 use ansi_term::Color::{Red, RGB};
 use std::fmt::Display;
 
-// TODO: Create a concrete set of error types as we develop a feel for common
-// errors and good names for errors.
 #[derive(Debug)]
 pub enum ErrorType {
     GarbageToken,
-    UnclosedCurly,
-    UnclosedParen,
-    UnclosedBracket,
     UnclosedQuotation,
     IOError,
     InvalidInteger,
     GeneralError,
     MissingIdentifier,
+    BadMultiVariableDeclaration,
+    BadParameterList,
+    MissingType,
+    UnexpectedToken,
+    ExpectedSemicolon,
+    NoReturn,
+    NoClassDeclaration,
 }
 
 impl Display for ErrorType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ErrorType::GarbageToken => write!(f, "GarbageToken"),
-            ErrorType::UnclosedCurly => write!(f, "UnclosedCurly"),
-            ErrorType::UnclosedParen => write!(f, "UnclosedParen"),
-            ErrorType::UnclosedBracket => write!(f, "UnclosedBracket"),
             ErrorType::UnclosedQuotation => write!(f, "UnclosedQuotation"),
             ErrorType::IOError => write!(f, "IOError"),
             ErrorType::InvalidInteger => write!(f, "InvalidInteger"),
             ErrorType::GeneralError => write!(f, "GeneralError"),
             ErrorType::MissingIdentifier => write!(f, "MissingIdentifier"),
+            ErrorType::BadMultiVariableDeclaration => write!(f, "BadMultiVariableDeclaration"),
+            ErrorType::BadParameterList => write!(f, "BadParameterList"),
+            ErrorType::MissingType => write!(f, "MissingType"),
+            ErrorType::UnexpectedToken => write!(f, "UnexpectedToken"),
+            ErrorType::ExpectedSemicolon => write!(f, "ExpectedSemicolon"),
+            ErrorType::NoReturn => write!(f, "NoReturn"),
+            ErrorType::NoClassDeclaration => write!(f, "NoClassDeclaration"),
         }
     }
 }
