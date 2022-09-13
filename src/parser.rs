@@ -1131,13 +1131,17 @@ impl Parser {
         .expect("Failed to write <ExpressionList>.");
         self.indent_amount += 2;
 
-        while self.current_token().token != Token::CloseParen {
+        if self.current_token().token != Token::CloseParen {
             expression_list_parse_tree.push_str(&self.parse_expression()?);
+        }
 
-            if self.current_token().token == Token::Comma {
-                self.index += 1;
-                expression_list_parse_tree.push_str(&self.parse_expression()?);
-            }
+        while self.current_token().token == Token::Comma {
+            // Add the comma to the parse tree and advance to start of
+            // expression.
+            expression_list_parse_tree.push_str(&self.generate_xml_tag());
+            self.index += 1;
+
+            expression_list_parse_tree.push_str(&self.parse_expression()?);
         }
 
         self.indent_amount -= 2;
@@ -1149,7 +1153,7 @@ impl Parser {
         )
         .expect("Failed to write </ExpressionList>.");
 
-        Ok(String::from(""))
+        Ok(expression_list_parse_tree)
     }
 
     fn parse_subroutine_call(&mut self) -> Result<String, JackError> {
