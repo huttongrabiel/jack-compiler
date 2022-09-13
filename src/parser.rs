@@ -326,8 +326,6 @@ impl Parser {
         // Parse ParameterList.
         subroutine_parse_tree.push_str(&self.parse_parameter_list()?);
 
-        eprintln!("current token: {:?}", self.tokens[self.index].token);
-
         if self.tokens[self.index].token != Token::CloseParen {
             return Err(JackError::new(
                 // FIXME: Add ErrorType for this. (ExpectedCloseParen)
