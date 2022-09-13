@@ -1020,10 +1020,10 @@ impl Parser {
 
         expression_parse_tree.push_str(&self.parse_term()?);
 
-        if self.current_token().token.is_op() {
+        while self.current_token().token.is_op() {
             expression_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
-            expression_parse_tree.push_str(&self.parse_expression()?);
+            expression_parse_tree.push_str(&self.parse_term()?);
         }
 
         self.indent_amount -= 2;
