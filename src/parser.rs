@@ -1034,36 +1034,81 @@ impl Parser {
         Ok(expression_parse_tree)
     }
 
-    // Will require a peek() function to see type of next token. This is to
-    // distinguish between foo, foo[i], foo.print(), etc.
     fn parse_term(&mut self) -> Result<String, JackError> {
         let mut term_parse_tree = self.generate_indent();
 
         writeln!(term_parse_tree, "<{:?}>", ParseTag::Term).expect("Failed to write <Term>.");
         self.indent_amount += 2;
 
+        // We should be on the first Token of the term by the time we get to
+        // this point of parsing a term.
+
         if matches!(
             self.current_token().token,
-            Token::IntegerConstant | Token::StringConstant | Token::Minus | Token::Tilde
+            Token::IntegerConstant | Token::StringConstant
         ) || self.current_token().token.is_keyword_constant()
         {
             term_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
         } else if self.current_token().token == Token::Identifier {
-            if self.peek().token == Token::OpenBracket {
-                term_parse_tree.push_str(&self.parse_expression()?);
-                // Add the closing bracket to the parse tree.
+            let next = &self.peek().token;
+
+            // identifier[expression]
+            if *next == Token::OpenBracket {
+                // Identifier
                 term_parse_tree.push_str(&self.generate_xml_tag());
                 self.index += 1;
-            } else if self.peek().token == Token::OpenParen || self.peek().token == Token::Dot {
+                // OpenBracket
+                term_parse_tree.push_str(&self.generate_xml_tag());
+                self.index += 1;
+                // Go parse the expression. Should return us back to the Close
+                // Bracket.
+                term_parse_tree.push_str(&self.parse_expression()?);
+
+                if self.current_token().token != Token::CloseBracket {
+                    return Err(JackError::new(
+                        // FIXME: Add ErrorType for this. (ExpectedCloseBracket?)
+                        ErrorType::GeneralError,
+                        "Expected ']'.",
+                        Some(self.tokens[self.index].path.clone()),
+                        Some(self.tokens[self.index].line),
+                        Some(self.tokens[self.index].column),
+                    ));
+                }
+
+                term_parse_tree.push_str(&self.generate_xml_tag());
+                self.index += 1;
+            // identifer.identifier(...) || identifier(...)
+            } else if *next == Token::Dot || *next == Token::OpenParen {
                 term_parse_tree.push_str(&self.parse_subroutine_call()?);
+            // identifier
             } else {
                 term_parse_tree.push_str(&self.generate_xml_tag());
                 self.index += 1;
             }
-        } else {
+        } else if self.current_token().token == Token::OpenParen {
             term_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
+
+            term_parse_tree.push_str(&self.parse_expression()?);
+
+            if self.current_token().token != Token::CloseParen {
+                return Err(JackError::new(
+                    // FIXME: Add ErrorType for this. (ExpectedCloseParen?)
+                    ErrorType::GeneralError,
+                    "Expected ')'.",
+                    Some(self.tokens[self.index].path.clone()),
+                    Some(self.tokens[self.index].line),
+                    Some(self.tokens[self.index].column),
+                ));
+            }
+
+            term_parse_tree.push_str(&self.generate_xml_tag());
+            self.index += 1;
+        } else if matches!(self.current_token().token, Token::Minus | Token::Tilde) {
+            term_parse_tree.push_str(&self.generate_xml_tag());
+            self.index += 1;
+            term_parse_tree.push_str(&self.parse_term()?);
         }
 
         self.indent_amount -= 2;
