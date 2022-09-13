@@ -660,10 +660,7 @@ impl Parser {
         do_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        // In this case, parse_expression should parse a SubroutineCall.
-        // It should see a term, that term should then be recognized as
-        // a SubroutineCall and then the SubroutineCall should be parsed.
-        do_parse_tree.push_str(&self.parse_expression()?);
+        do_parse_tree.push_str(&self.parse_subroutine_call()?);
 
         if self.current_token().token != Token::Semicolon {
             return Err(JackError::new(
