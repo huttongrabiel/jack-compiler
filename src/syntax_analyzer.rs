@@ -46,9 +46,11 @@ impl FileData {
 pub fn analyzer_main() -> Result<(), JackError> {
     let jack_files = get_jack_files()?;
 
-    let parse_tree = generate_xml(&jack_files)?;
+    let parser_debug = env::var("PARSER_DEBUG").is_ok();
 
-    println!("{parse_tree}");
+    if parser_debug {
+        generate_xml(&jack_files)?;
+    }
 
     Ok(())
 }
