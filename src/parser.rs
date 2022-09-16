@@ -1,5 +1,6 @@
 use crate::error::{ErrorType, JackError};
 use crate::lexer::{Token, TokenData, TokenType};
+use crate::symbol_table::SymbolTable;
 use std::fmt::Write;
 
 #[derive(Debug)]
@@ -72,6 +73,8 @@ pub struct Parser {
     tokens: Vec<TokenData>,
     index: usize,
     indent_amount: usize,
+    class_symbol_table: SymbolTable,
+    subroutine_symbol_table: SymbolTable,
 }
 
 impl Parser {
@@ -80,10 +83,12 @@ impl Parser {
             tokens,
             index: 0,
             indent_amount: 0,
+            class_symbol_table: SymbolTable::new(),
+            subroutine_symbol_table: SymbolTable::new(),
         }
     }
 
-    pub fn parse(&mut self) -> Result<String, JackError> {
+    pub fn parse(&mut self) -> Result<(String, String), JackError> {
         if self.tokens[0].token != Token::Class {
             return Err(JackError::new(
                 ErrorType::NoClassDeclaration,
@@ -95,14 +100,15 @@ impl Parser {
         }
 
         let mut parse_tree = String::new();
+        let mut vm_code = String::new();
 
         //  parse_class() is the jumping off point for our parser. It should
         //  call the functions it needs which in turn call other functions etc.
         //  But each jack file starts with a class so that is all we should need
         //  to call the begin the descent parsing.
-        parse_tree.push_str(&self.parse_class()?);
+        let (parse_tree, vm_code) = self.parse_class()?;
 
-        Ok(parse_tree)
+        Ok((parse_tree, vm_code))
     }
 
     fn has_more_tokens(&self) -> bool {
@@ -128,8 +134,13 @@ impl Parser {
         &self.tokens[self.index - 1]
     }
 
-    fn parse_class(&mut self) -> Result<String, JackError> {
+    // FIXME: Return a (String, String) eventually.
+    fn parse_class(&mut self) -> Result<(String, String), JackError> {
+        // Output string for XML parse tree.
         let mut class_parse_tree = String::from("<class>\n");
+
+        // Output string for VM code.
+        let mut class_vm_code = String::new();
 
         self.indent_amount += 2;
         class_parse_tree.push_str(&self.generate_xml_tag());
@@ -165,9 +176,17 @@ impl Parser {
         // Move to the first token of the body of the class.
         self.index += 1;
 
+        let (xml_ast, local_vm_code) = &self.parse_class_var_dec()?;
+        class_parse_tree.push_str(xml_ast);
+        class_vm_code.push_str(&local_vm_code);
+        let (xml_ast, local_vm_code) = &self.parse_class_var_dec()?;
+        class_parse_tree.push_str(xml_ast);
+        class_vm_code.push_str(&local_vm_code);
+
+        // FIXME: Remove this commented out code.
         // Into the depths we go!
-        class_parse_tree.push_str(&self.parse_class_var_dec()?);
-        class_parse_tree.push_str(&self.parse_subroutine()?);
+        //        class_parse_tree.push_str(&self.parse_class_var_dec()?);
+        //        class_parse_tree.push_str(&self.parse_subroutine()?);
 
         // We should only return to this point once we have reached the end of
         // the class.
@@ -183,14 +202,14 @@ impl Parser {
 
         class_parse_tree.push_str("</class>");
 
-        Ok(class_parse_tree)
+        Ok((class_parse_tree, class_vm_code))
     }
 
-    fn parse_class_var_dec(&mut self) -> Result<String, JackError> {
+    fn parse_class_var_dec(&mut self) -> Result<(String, String), JackError> {
         if self.current_token().token != Token::Field && self.current_token().token != Token::Static
         {
             // Classes do not require having variable declarations.
-            return Ok(String::from(""));
+            return Ok((String::from(""), String::from("")));
         }
 
         let mut cvd_parse_tree = self.generate_indent();
@@ -203,6 +222,8 @@ impl Parser {
             self.current_token().token == Token::Field
                 || self.current_token().token == Token::Static
         );
+
+        let segment_token = self.current_token().token;
 
         cvd_parse_tree.push_str(&self.generate_xml_tag());
 
