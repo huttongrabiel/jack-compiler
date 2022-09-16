@@ -3,6 +3,18 @@ use crate::lexer::{Token, TokenData, TokenType};
 use std::fmt::Write;
 
 #[derive(Debug)]
+pub enum Segment {
+    Const,
+    Arg,
+    Local,
+    Static,
+    This,
+    That,
+    Pointer,
+    Temp,
+}
+
+#[derive(Debug)]
 pub enum ParseTag {
     // 'class' className '{' ClassVarDec* SubroutineDec* '}'
     Class,
