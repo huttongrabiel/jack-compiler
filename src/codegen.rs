@@ -28,31 +28,43 @@ impl Codegen {
     fn gen_arithmetic(command: Token) -> String {
         let mut arithmetic_op = "";
         match command {
-            Token::Plus => arithmetic_op = "add",
+            Token::Plus => arithmetic_op = "add\n",
             // FIXME: Figure out how to allow negating a number. Right now the
             // negation won't work because all '-' are treated as sub.
-            Token::Minus => arithmetic_op = "sub",
-            Token::Equal => arithmetic_op = "eq",
-            Token::GreaterThan => arithmetic_op = "gt",
-            Token::LessThan => arithmetic_op = "lt",
-            Token::Ampersand => arithmetic_op = "and",
-            Token::Pipe => arithmetic_op = "or",
-            Token::Tilde => arithmetic_op = "not",
+            Token::Minus => arithmetic_op = "sub\n",
+            Token::Equal => arithmetic_op = "eq\n",
+            Token::GreaterThan => arithmetic_op = "gt\n",
+            Token::LessThan => arithmetic_op = "lt\n",
+            Token::Ampersand => arithmetic_op = "and\n",
+            Token::Pipe => arithmetic_op = "or\n",
+            Token::Tilde => arithmetic_op = "not\n",
             _ => panic!("Non-arithmetic token given to gen_arithmetic."),
         }
 
         arithmetic_op.to_string()
     }
 
-    fn gen_label(label: String) -> String {}
+    fn gen_label(label: String) -> String {
+        format!("label {}\n", label)
+    }
 
-    fn gen_goto(label: String) -> String {}
+    fn gen_goto(label: String) -> String {
+        format!("goto {}\n", label)
+    }
 
-    fn gen_if(label: String) -> String {}
+    fn gen_if(label: String) -> String {
+        format!("if-goto {}\n", label)
+    }
 
-    fn gen_call(name: String, n_args: u32) -> String {}
+    fn gen_call(name: String, n_args: u32) -> String {
+        format!("call {} {}\n", name, n_args)
+    }
 
-    fn gen_function(name: String, n_locals: u32) -> String {}
+    fn gen_function(name: String, n_locals: u32) -> String {
+        format!("function {} {}\n", name, n_locals)
+    }
 
-    fn gen_return() -> String {}
+    fn gen_return() -> String {
+        String::from("return\n")
+    }
 }
