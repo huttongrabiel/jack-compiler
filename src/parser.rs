@@ -1,6 +1,7 @@
+use crate::codegen;
 use crate::error::{ErrorType, JackError};
 use crate::lexer::{Token, TokenData, TokenType};
-use crate::symbol_table::SymbolTable;
+use crate::symbol_table::{Kind, SymbolTable};
 use std::fmt::Write;
 
 #[derive(Debug)]
@@ -134,7 +135,6 @@ impl Parser {
         &self.tokens[self.index - 1]
     }
 
-    // FIXME: Return a (String, String) eventually.
     fn parse_class(&mut self) -> Result<(String, String), JackError> {
         // Output string for XML parse tree.
         let mut class_parse_tree = String::from("<class>\n");
@@ -179,7 +179,8 @@ impl Parser {
         let (xml_ast, local_vm_code) = &self.parse_class_var_dec()?;
         class_parse_tree.push_str(xml_ast);
         class_vm_code.push_str(&local_vm_code);
-        let (xml_ast, local_vm_code) = &self.parse_class_var_dec()?;
+
+        let (xml_ast, local_vm_code) = &self.parse_subroutine()?;
         class_parse_tree.push_str(xml_ast);
         class_vm_code.push_str(&local_vm_code);
 
@@ -212,6 +213,8 @@ impl Parser {
             return Ok((String::from(""), String::from("")));
         }
 
+        let mut var_dec_vm_code = String::new();
+
         let mut cvd_parse_tree = self.generate_indent();
         writeln!(cvd_parse_tree, "<{:?}>", ParseTag::ClassVarDec)
             .expect("Failed to write cvd_parse_tree.");
@@ -223,7 +226,15 @@ impl Parser {
                 || self.current_token().token == Token::Static
         );
 
-        let segment_token = self.current_token().token;
+        let mut kind: Kind;
+        let mut segment: Segment;
+        if self.current_token().token == Token::Field {
+            kind = Kind::Field;
+            segment = Segment::Local;
+        } else {
+            kind = Kind::Static;
+            segment = Segment::Static;
+        }
 
         cvd_parse_tree.push_str(&self.generate_xml_tag());
 
@@ -241,6 +252,7 @@ impl Parser {
             ));
         }
 
+        let ty = format!("{:?}", self.current_token().token);
         self.index += 1;
 
         if self.tokens[self.index].token != Token::Identifier {
@@ -253,10 +265,20 @@ impl Parser {
             ));
         }
 
+        assert!(self.current_token().token_str.is_some());
+
+        // We call the push before adding anything to the symbol table because
+        // the index changes after the symbol is added to the table.
+        var_dec_vm_code.push_str(&codegen::gen_push(segment, self.class_symbol_table.index));
+        self.class_symbol_table
+            .define(self.current_token().token_str.unwrap(), ty, kind);
+
         cvd_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        cvd_parse_tree.push_str(&self.parse_multi_variable_declaration()?);
+        let (xml_ast, vm_code) = self.parse_multi_variable_declaration()?;
+        cvd_parse_tree.push_str(&xml_ast);
+        var_dec_vm_code.push_str(&vm_code);
 
         if self.tokens[self.index].token != Token::Semicolon {
             return Err(JackError::new(
@@ -281,10 +303,12 @@ impl Parser {
         if self.tokens[self.index].token == Token::Static
             || self.tokens[self.index].token == Token::Field
         {
-            cvd_parse_tree.push_str(&self.parse_class_var_dec()?);
+            let (xml_ast, vm_code) = &self.parse_class_var_dec()?;
+            var_dec_vm_code.push_str(vm_code);
+            cvd_parse_tree.push_str(xml_ast);
         }
 
-        Ok(cvd_parse_tree)
+        Ok((var_dec_vm_code, cvd_parse_tree))
     }
 
     // Subroutine can be a method, function, or constructor
