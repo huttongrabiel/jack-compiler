@@ -210,7 +210,7 @@ impl Parser {
         if self.current_token().token != Token::Field && self.current_token().token != Token::Static
         {
             // Classes do not require having variable declarations.
-            return Ok((String::from(""), String::from("")));
+            return Ok((String::new(), String::new()));
         }
 
         let mut var_dec_vm_code = String::new();
@@ -316,7 +316,7 @@ impl Parser {
         // Subroutines are not required in a class.
         match self.tokens[self.index].token {
             Token::Constructor | Token::Function | Token::Method => (),
-            _ => return Ok(String::from("")),
+            _ => return Ok((String::new(), String::new())),
         }
 
         let mut subroutine_parse_tree = self.generate_indent();
@@ -539,7 +539,7 @@ impl Parser {
     fn parse_var_dec(&mut self) -> Result<String, JackError> {
         // VarDec is optional is subroutine body.
         if self.tokens[self.index].token != Token::Var {
-            return Ok(String::from(""));
+            return Ok(String::new());
         }
 
         let mut var_dec_parse_tree = self.generate_indent();
