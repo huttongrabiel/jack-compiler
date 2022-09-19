@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum Kind {
     Static,
@@ -22,6 +24,21 @@ impl Symbol {
             kind,
             index,
         }
+    }
+}
+
+impl Display for Symbol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "\
+=========================================
+Name: {},
+Ty: {},
+Kind: {:?},
+Index: {}",
+            self.name, self.ty, self.kind, self.index
+        )
     }
 }
 
