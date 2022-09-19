@@ -267,9 +267,7 @@ impl Parser {
 
         assert!(self.current_token().token_str.is_some());
 
-        // We call the push before adding anything to the symbol table because
-        // the index changes after the symbol is added to the table.
-        var_dec_vm_code.push_str(&codegen::gen_push(segment, self.class_symbol_table.index));
+        // No VM code should be generated for variable declarations.
         self.class_symbol_table
             .define(self.current_token().token_str.unwrap(), ty, kind);
 
