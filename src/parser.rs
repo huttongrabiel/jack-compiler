@@ -89,7 +89,7 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Result<(String, String), JackError> {
+    pub fn parse(&mut self) -> Result<String, JackError> {
         if self.tokens[0].token != Token::Class {
             return Err(JackError::new(
                 ErrorType::NoClassDeclaration,
@@ -101,15 +101,14 @@ impl Parser {
         }
 
         let mut parse_tree = String::new();
-        let mut vm_code = String::new();
 
         //  parse_class() is the jumping off point for our parser. It should
         //  call the functions it needs which in turn call other functions etc.
         //  But each jack file starts with a class so that is all we should need
         //  to call the begin the descent parsing.
-        let (parse_tree, vm_code) = self.parse_class()?;
+        let parse_tree = self.parse_class()?;
 
-        Ok((parse_tree, vm_code))
+        Ok(parse_tree)
     }
 
     fn has_more_tokens(&self) -> bool {
@@ -135,7 +134,7 @@ impl Parser {
         &self.tokens[self.index - 1]
     }
 
-    fn parse_class(&mut self) -> Result<(String, String), JackError> {
+    fn parse_class(&mut self) -> Result<String, JackError> {
         // Output string for XML parse tree.
         let mut class_parse_tree = String::from("<class>\n");
 
@@ -176,18 +175,8 @@ impl Parser {
         // Move to the first token of the body of the class.
         self.index += 1;
 
-        let (xml_ast, local_vm_code) = &self.parse_class_var_dec()?;
-        class_parse_tree.push_str(xml_ast);
-        class_vm_code.push_str(&local_vm_code);
-
-        let (xml_ast, local_vm_code) = &self.parse_subroutine()?;
-        class_parse_tree.push_str(xml_ast);
-        class_vm_code.push_str(&local_vm_code);
-
-        // FIXME: Remove this commented out code.
-        // Into the depths we go!
-        //        class_parse_tree.push_str(&self.parse_class_var_dec()?);
-        //        class_parse_tree.push_str(&self.parse_subroutine()?);
+        class_parse_tree.push_str(&self.parse_class_var_dec()?);
+        class_parse_tree.push_str(&self.parse_subroutine()?);
 
         // We should only return to this point once we have reached the end of
         // the class.
@@ -203,14 +192,14 @@ impl Parser {
 
         class_parse_tree.push_str("</class>");
 
-        Ok((class_parse_tree, class_vm_code))
+        Ok(class_parse_tree)
     }
 
-    fn parse_class_var_dec(&mut self) -> Result<(String, String), JackError> {
+    fn parse_class_var_dec(&mut self) -> Result<String, JackError> {
         if self.current_token().token != Token::Field && self.current_token().token != Token::Static
         {
             // Classes do not require having variable declarations.
-            return Ok((String::new(), String::new()));
+            return Ok(String::new());
         }
 
         let mut var_dec_vm_code = String::new();
@@ -268,15 +257,16 @@ impl Parser {
         assert!(self.current_token().token_str.is_some());
 
         // No VM code should be generated for variable declarations.
-        self.class_symbol_table
-            .define(self.current_token().token_str.unwrap(), ty, kind);
+        self.class_symbol_table.define(
+            self.current_token().token_str.as_ref().unwrap().to_string(),
+            ty.clone(),
+            kind,
+        );
 
         cvd_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        let (xml_ast, vm_code) = self.parse_multi_variable_declaration()?;
-        cvd_parse_tree.push_str(&xml_ast);
-        var_dec_vm_code.push_str(&vm_code);
+        cvd_parse_tree.push_str(&self.parse_multi_variable_declaration(ty, kind)?);
 
         if self.tokens[self.index].token != Token::Semicolon {
             return Err(JackError::new(
@@ -301,12 +291,10 @@ impl Parser {
         if self.tokens[self.index].token == Token::Static
             || self.tokens[self.index].token == Token::Field
         {
-            let (xml_ast, vm_code) = &self.parse_class_var_dec()?;
-            var_dec_vm_code.push_str(vm_code);
-            cvd_parse_tree.push_str(xml_ast);
+            cvd_parse_tree.push_str(&self.parse_class_var_dec()?);
         }
 
-        Ok((var_dec_vm_code, cvd_parse_tree))
+        Ok(cvd_parse_tree)
     }
 
     // Subroutine can be a method, function, or constructor
@@ -314,7 +302,7 @@ impl Parser {
         // Subroutines are not required in a class.
         match self.tokens[self.index].token {
             Token::Constructor | Token::Function | Token::Method => (),
-            _ => return Ok((String::new(), String::new())),
+            _ => return Ok(String::new()),
         }
 
         let mut subroutine_parse_tree = self.generate_indent();
@@ -559,6 +547,8 @@ impl Parser {
             ));
         }
 
+        let ty = format!("{:?}", self.current_token().token);
+
         var_dec_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
@@ -575,7 +565,8 @@ impl Parser {
         var_dec_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        var_dec_parse_tree.push_str(&self.parse_multi_variable_declaration()?);
+        // This function only parses local variables.
+        var_dec_parse_tree.push_str(&self.parse_multi_variable_declaration(ty, Kind::Local)?);
 
         if self.tokens[self.index].token != Token::Semicolon {
             return Err(JackError::new(
@@ -611,7 +602,11 @@ impl Parser {
     /// This function gets called after it has been checked that a 'var int foo'
     /// exists. It then gets called and continues parsing until it encounters a
     /// semi colon at which point it returns its parse tree.
-    fn parse_multi_variable_declaration(&mut self) -> Result<String, JackError> {
+    fn parse_multi_variable_declaration(
+        &mut self,
+        ty: String,
+        kind: Kind,
+    ) -> Result<String, JackError> {
         let mut multi_variable_declaration_parse_tree = String::new();
 
         while self.tokens[self.index].token != Token::Semicolon {
@@ -620,6 +615,11 @@ impl Parser {
             {
                 multi_variable_declaration_parse_tree.push_str(&self.generate_xml_tag());
                 self.index += 1;
+                self.class_symbol_table.define(
+                    self.current_token().token_str.as_ref().unwrap().to_string(),
+                    ty.clone(),
+                    kind,
+                );
                 multi_variable_declaration_parse_tree.push_str(&self.generate_xml_tag());
             } else {
                 return Err(JackError::new(
