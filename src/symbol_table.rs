@@ -33,9 +33,9 @@ impl Display for Symbol {
             f,
             "\
 =========================================
-Name: {},
-Ty: {},
-Kind: {:?},
+Name: {}
+Ty: {}
+Kind: {:?}
 Index: {}",
             self.name, self.ty, self.kind, self.index
         )
@@ -62,7 +62,7 @@ impl SymbolTable {
         }
     }
 
-    pub fn define(&self, name: String, ty: String, kind: Kind) {
+    pub fn define(&mut self, name: String, ty: String, kind: Kind) {
         let index = match kind {
             Kind::Static => self.static_index,
             Kind::Arg => self.field_index,
@@ -71,6 +71,8 @@ impl SymbolTable {
         };
 
         let symbol = Symbol::new(name, ty, kind, index);
+        eprintln!("{}", symbol);
+        self.symbol_table.push(symbol);
 
         match kind {
             Kind::Static => self.static_index += 1,
@@ -123,7 +125,7 @@ impl SymbolTable {
         let mut index: Option<u32> = None;
         for symbol in &self.symbol_table {
             if symbol.ty == name_needle {
-                index = Some(self.index);
+                index = Some(symbol.index);
             }
         }
         index
