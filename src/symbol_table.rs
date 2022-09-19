@@ -3,7 +3,7 @@ pub enum Kind {
     Static,
     Field,
     Arg,
-    Var,
+    Local,
 }
 
 #[derive(Debug)]
@@ -11,36 +11,64 @@ pub struct Symbol {
     name: String,
     ty: String,
     kind: Kind,
+    index: u32,
 }
 
 impl Symbol {
-    pub fn new(name: String, ty: String, kind: Kind) -> Self {
-        Self { name, ty, kind }
+    pub fn new(name: String, ty: String, kind: Kind, index: u32) -> Self {
+        Self {
+            name,
+            ty,
+            kind,
+            index,
+        }
     }
 }
 
 #[derive(Debug)]
 pub struct SymbolTable {
     pub symbol_table: Vec<Symbol>,
-    pub index: u32,
+    pub static_index: u32,
+    pub field_index: u32,
+    pub arg_index: u32,
+    pub local_index: u32,
 }
 
 impl SymbolTable {
     pub fn new() -> Self {
         Self {
             symbol_table: Vec::new(),
-            index: 0,
+            static_index: 0,
+            field_index: 0,
+            arg_index: 0,
+            local_index: 0,
         }
     }
 
     pub fn define(&self, name: String, ty: String, kind: Kind) {
-        let symbol = Symbol::new(name, ty, kind);
-        self.index += 1;
+        let index = match kind {
+            Kind::Static => self.static_index,
+            Kind::Arg => self.field_index,
+            Kind::Field => self.arg_index,
+            Kind::Local => self.local_index,
+        };
+
+        let symbol = Symbol::new(name, ty, kind, index);
+
+        match kind {
+            Kind::Static => self.static_index += 1,
+            Kind::Arg => self.field_index += 1,
+            Kind::Field => self.arg_index += 1,
+            Kind::Local => self.local_index += 1,
+        }
     }
 
     pub fn clear_table(&mut self) {
         self.symbol_table.clear();
-        self.index = 0;
+        self.static_index = 0;
+        self.field_index = 0;
+        self.arg_index = 0;
+        self.local_index = 0;
     }
 
     pub fn var_count(&self, kind: Kind) -> u32 {
