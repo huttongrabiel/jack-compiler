@@ -236,7 +236,8 @@ impl Parser {
             ));
         }
 
-        let ty = format!("{:?}", self.current_token().token);
+        let ty = self.current_token().ty();
+
         self.index += 1;
 
         if self.tokens[self.index].token != Token::Identifier {
