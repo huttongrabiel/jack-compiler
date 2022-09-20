@@ -576,6 +576,12 @@ impl Parser {
             ));
         }
 
+        self.subroutine_symbol_table.define(
+            self.current_token().token_str.as_ref().unwrap().to_string(),
+            ty.clone(),
+            Kind::Local,
+        );
+
         var_dec_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
