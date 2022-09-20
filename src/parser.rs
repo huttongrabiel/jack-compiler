@@ -2,7 +2,7 @@ use crate::codegen;
 use crate::error::{ErrorType, JackError};
 use crate::lexer::{Token, TokenData, TokenType};
 use crate::symbol_table::{Kind, Symbol, SymbolTable};
-use std::fmt::Write;
+use std::fmt::{Display, Write};
 
 #[derive(Debug)]
 pub enum Segment {
@@ -14,6 +14,21 @@ pub enum Segment {
     That,
     Pointer,
     Temp,
+}
+
+impl Display for Segment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Segment::Const => write!(f, "constant"),
+            Segment::Arg => write!(f, "argument"),
+            Segment::Local => write!(f, "local"),
+            Segment::Static => write!(f, "static"),
+            Segment::This => write!(f, "this"),
+            Segment::That => write!(f, "that"),
+            Segment::Pointer => write!(f, "pointer"),
+            Segment::Temp => write!(f, "temp"),
+        }
+    }
 }
 
 #[derive(Debug)]
