@@ -13,7 +13,7 @@ pub fn gen_pop(segment: Segment, index: u32) -> String {
     pop
 }
 
-pub fn gen_arithmetic(command: Token) -> String {
+pub fn gen_arithmetic(command: &Token) -> String {
     let arithmetic_op = match command {
         Token::Plus => "add\n",
         // FIXME: Figure out how to allow negating a number. Right now the
