@@ -466,6 +466,8 @@ impl Parser {
             ));
         }
 
+        let ty = self.current_token().ty();
+
         parameter_list_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
@@ -479,6 +481,12 @@ impl Parser {
             ));
         }
 
+        self.subroutine_symbol_table.define(
+            self.current_token().token_str.as_ref().unwrap().to_string(),
+            ty,
+            Kind::Arg,
+        );
+
         parameter_list_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
@@ -488,11 +496,21 @@ impl Parser {
                 && self.peek().token.is_type()
                 && self.peek_k(2).token == Token::Identifier
             {
+                // Comma
                 parameter_list_parse_tree.push_str(&self.generate_xml_tag());
+                // Type
                 self.index += 1;
                 parameter_list_parse_tree.push_str(&self.generate_xml_tag());
+                let ty = self.current_token().ty();
+                // Identifier
                 self.index += 1;
                 parameter_list_parse_tree.push_str(&self.generate_xml_tag());
+                // Add to symbol table.
+                self.subroutine_symbol_table.define(
+                    self.current_token().token_str.as_ref().unwrap().to_string(),
+                    ty,
+                    Kind::Arg,
+                );
             } else {
                 return Err(JackError::new(
                     ErrorType::BadParameterList,
