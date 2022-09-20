@@ -301,6 +301,8 @@ impl Parser {
             _ => return Ok(String::new()),
         }
 
+        self.subroutine_symbol_table.clear_table();
+
         let mut subroutine_parse_tree = self.generate_indent();
 
         // Parse start of SubroutineDec.
@@ -635,11 +637,22 @@ impl Parser {
             {
                 multi_variable_declaration_parse_tree.push_str(&self.generate_xml_tag());
                 self.index += 1;
-                self.class_symbol_table.define(
-                    self.current_token().token_str.as_ref().unwrap().to_string(),
-                    ty.clone(),
-                    kind,
-                );
+
+                // Pick the right symbol table depending on the kind.
+                if matches!(kind, Kind::Local | Kind::Arg) {
+                    self.subroutine_symbol_table.define(
+                        self.current_token().token_str.as_ref().unwrap().to_string(),
+                        ty.clone(),
+                        kind,
+                    );
+                } else {
+                    self.class_symbol_table.define(
+                        self.current_token().token_str.as_ref().unwrap().to_string(),
+                        ty.clone(),
+                        kind,
+                    );
+                }
+
                 multi_variable_declaration_parse_tree.push_str(&self.generate_xml_tag());
             } else {
                 return Err(JackError::new(
