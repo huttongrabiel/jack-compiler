@@ -1,15 +1,27 @@
-use crate::{lexer::Token, parser::Segment};
+use crate::{lexer::Token, parser::Segment, symbol_table::Symbol};
 use std::fmt::Write;
 
-pub fn gen_push(segment: Segment, index: u32) -> String {
+pub fn gen_push(symbol: &Symbol) -> String {
     let mut push = String::from("push ");
-    writeln!(push, "{:?} {}", segment, index).unwrap();
+
+    let mut segment: Segment = symbol.kind.as_segment();
+    if symbol.name == "this" {
+        segment = Segment::This;
+    }
+
+    writeln!(push, "{} {}", segment, symbol.index).unwrap();
     push
 }
 
-pub fn gen_pop(segment: Segment, index: u32) -> String {
+pub fn gen_pop(symbol: &Symbol) -> String {
     let mut pop = String::from("pop ");
-    writeln!(pop, "{:?} {}", segment, index).unwrap();
+
+    let mut segment: Segment = symbol.kind.as_segment();
+    if symbol.name == "this" {
+        segment = Segment::This;
+    }
+
+    writeln!(pop, "{} {}", segment, symbol.index).unwrap();
     pop
 }
 
