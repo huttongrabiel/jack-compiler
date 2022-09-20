@@ -74,7 +74,7 @@ pub struct Parser {
     tokens: Vec<TokenData>,
     index: usize,
     indent_amount: usize,
-    class_symbol_table: SymbolTable,
+    pub class_symbol_table: SymbolTable,
     subroutine_symbol_table: SymbolTable,
 }
 

@@ -116,6 +116,8 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
         .expect("Failed to write to output file");
 
         parse_tree.clear();
+        // Each class gets a fresh symbol table.
+        parser.class_symbol_table.clear_table();
     }
 
     Ok(parse_tree)
