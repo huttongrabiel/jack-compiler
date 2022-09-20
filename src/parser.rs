@@ -699,6 +699,7 @@ impl Parser {
         }
 
         let mut statement_parse_tree = self.generate_indent();
+        let mut statement_vm_code = String::new();
 
         writeln!(statement_parse_tree, "<{:?}>", ParseTag::Statements)
             .expect("Failed to write <Statements>.");
@@ -706,11 +707,11 @@ impl Parser {
 
         while self.current_token().token.is_statement_keyword() {
             match self.tokens[self.index].token {
-                Token::Let => statement_parse_tree.push_str(&self.parse_let()?),
-                Token::If => statement_parse_tree.push_str(&self.parse_if()?),
-                Token::While => statement_parse_tree.push_str(&self.parse_while()?),
-                Token::Do => statement_parse_tree.push_str(&self.parse_do()?),
-                Token::Return => statement_parse_tree.push_str(&self.parse_return()?),
+                Token::Let => statement_vm_code.push_str(&self.parse_let()?),
+                Token::If => statement_vm_code.push_str(&self.parse_if()?),
+                Token::While => statement_vm_code.push_str(&self.parse_while()?),
+                Token::Do => statement_vm_code.push_str(&self.parse_do()?),
+                Token::Return => statement_vm_code.push_str(&self.parse_return()?),
                 _ => {
                     return Err(JackError::new(
                         ErrorType::UnexpectedToken,
@@ -728,7 +729,7 @@ impl Parser {
         writeln!(statement_parse_tree, "</{:?}>", ParseTag::Statements)
             .expect("Failed to write </Statements>.");
 
-        Ok(statement_parse_tree)
+        Ok(statement_vm_code)
     }
 
     fn parse_do(&mut self) -> Result<String, JackError> {
