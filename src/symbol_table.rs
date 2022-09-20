@@ -51,6 +51,12 @@ pub struct SymbolTable {
     pub local_index: u32,
 }
 
+impl Default for SymbolTable {
+    fn default() -> Self {
+        SymbolTable::new()
+    }
+}
+
 impl SymbolTable {
     pub fn new() -> Self {
         Self {

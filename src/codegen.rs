@@ -14,20 +14,19 @@ pub fn gen_pop(segment: Segment, index: u32) -> String {
 }
 
 pub fn gen_arithmetic(command: Token) -> String {
-    let mut arithmetic_op = "";
-    match command {
-        Token::Plus => arithmetic_op = "add\n",
+    let arithmetic_op = match command {
+        Token::Plus => "add\n",
         // FIXME: Figure out how to allow negating a number. Right now the
         // negation won't work because all '-' are treated as sub.
-        Token::Minus => arithmetic_op = "sub\n",
-        Token::Equal => arithmetic_op = "eq\n",
-        Token::GreaterThan => arithmetic_op = "gt\n",
-        Token::LessThan => arithmetic_op = "lt\n",
-        Token::Ampersand => arithmetic_op = "and\n",
-        Token::Pipe => arithmetic_op = "or\n",
-        Token::Tilde => arithmetic_op = "not\n",
+        Token::Minus => "sub\n",
+        Token::Equal => "eq\n",
+        Token::GreaterThan => "gt\n",
+        Token::LessThan => "lt\n",
+        Token::Ampersand => "and\n",
+        Token::Pipe => "or\n",
+        Token::Tilde => "not\n",
         _ => panic!("Non-arithmetic token given to gen_arithmetic."),
-    }
+    };
 
     arithmetic_op.to_string()
 }
