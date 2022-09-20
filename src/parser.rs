@@ -851,6 +851,7 @@ impl Parser {
 
     fn parse_while(&mut self) -> Result<String, JackError> {
         let mut while_parse_tree = self.generate_indent();
+        let mut while_vm_code = String::new();
 
         writeln!(while_parse_tree, "<{:?}>", ParseTag::WhileStatement)
             .expect("Failed to write <WhileStatement>.");
@@ -873,7 +874,7 @@ impl Parser {
         while_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        while_parse_tree.push_str(&self.parse_expression()?);
+        while_vm_code.push_str(&self.parse_expression()?);
 
         if self.current_token().token != Token::CloseParen {
             return Err(JackError::new(
@@ -901,7 +902,7 @@ impl Parser {
         while_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        while_parse_tree.push_str(&self.parse_statements()?);
+        while_vm_code.push_str(&self.parse_statements()?);
 
         if self.current_token().token != Token::CloseCurly {
             return Err(JackError::new(
@@ -921,7 +922,7 @@ impl Parser {
         writeln!(while_parse_tree, "</{:?}>", ParseTag::WhileStatement)
             .expect("Failed to write </WhileStatement>.");
 
-        Ok(while_parse_tree)
+        Ok(while_vm_code)
     }
 
     fn parse_return(&mut self) -> Result<String, JackError> {
