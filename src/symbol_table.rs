@@ -8,6 +8,17 @@ pub enum Kind {
     Local,
 }
 
+impl Display for Kind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Kind::Static => write!(f, "static"),
+            Kind::Field => write!(f, "field"),
+            Kind::Arg => write!(f, "argument"),
+            Kind::Local => write!(f, "local"),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Symbol {
     name: String,
