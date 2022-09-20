@@ -131,13 +131,11 @@ impl TokenData {
     }
 
     pub fn ty(&self) -> String {
-        let ty: String;
-
-        if self.token == Token::Identifier {
-            ty = self.token_str.as_ref().unwrap().to_string();
+        let ty = if self.token == Token::Identifier {
+            self.token_str.as_ref().unwrap().to_string()
         } else {
-            ty = format!("{:?}", self.token);
-        }
+            format!("{:?}", self.token)
+        };
 
         ty
     }

@@ -102,8 +102,6 @@ impl Parser {
             ));
         }
 
-        let mut parse_tree = String::new();
-
         //  parse_class() is the jumping off point for our parser. It should
         //  call the functions it needs which in turn call other functions etc.
         //  But each jack file starts with a class so that is all we should need
@@ -139,9 +137,6 @@ impl Parser {
     fn parse_class(&mut self) -> Result<String, JackError> {
         // Output string for XML parse tree.
         let mut class_parse_tree = String::from("<class>\n");
-
-        // Output string for VM code.
-        let mut class_vm_code = String::new();
 
         self.indent_amount += 2;
         class_parse_tree.push_str(&self.generate_xml_tag());
@@ -216,12 +211,11 @@ impl Parser {
                 || self.current_token().token == Token::Static
         );
 
-        let kind: Kind;
-        if self.current_token().token == Token::Field {
-            kind = Kind::Field;
+        let kind: Kind = if self.current_token().token == Token::Field {
+            Kind::Field
         } else {
-            kind = Kind::Static;
-        }
+            Kind::Static
+        };
 
         cvd_parse_tree.push_str(&self.generate_xml_tag());
 
