@@ -1,7 +1,7 @@
 use crate::codegen;
 use crate::error::{ErrorType, JackError};
 use crate::lexer::{Token, TokenData, TokenType};
-use crate::symbol_table::{Kind, SymbolTable};
+use crate::symbol_table::{Kind, Symbol, SymbolTable};
 use std::fmt::Write;
 
 #[derive(Debug)]
@@ -790,6 +790,8 @@ impl Parser {
             ));
         }
 
+        let name = self.current_token().token_str.as_ref().unwrap().to_string();
+
         let_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
@@ -837,6 +839,27 @@ impl Parser {
                 Some(self.tokens[self.index].column),
             ));
         }
+
+        // This symbol uses name which is defined above. name should be the
+        // name of the token following the let statement. 'let name = ...'
+        //
+        // To put data in name, we pop whatever the parse_expression statements
+        // have put onto the stack into the location that represents the symbol.
+        let symbol: &Symbol = if let Some(sym) = self.subroutine_symbol_table.get_symbol(&name) {
+            sym
+        } else if let Some(sym) = self.class_symbol_table.get_symbol(&name) {
+            sym
+        } else {
+            return Err(JackError::new(
+                ErrorType::UndeclaredVariable,
+                "Undeclared variable encountered.",
+                Some(self.tokens[self.index].path.clone()),
+                Some(self.tokens[self.index].line),
+                Some(self.tokens[self.index].column),
+            ));
+        };
+
+        writeln!(let_vm_code, "pop {} {}", symbol.kind, symbol.index).unwrap();
 
         let_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
