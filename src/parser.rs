@@ -74,6 +74,7 @@ pub struct Parser {
     tokens: Vec<TokenData>,
     index: usize,
     indent_amount: usize,
+    current_class: String,
     pub class_symbol_table: SymbolTable,
     subroutine_symbol_table: SymbolTable,
 }
@@ -84,6 +85,7 @@ impl Parser {
             tokens,
             index: 0,
             indent_amount: 0,
+            current_class: String::new(),
             class_symbol_table: SymbolTable::new(),
             subroutine_symbol_table: SymbolTable::new(),
         }
@@ -156,6 +158,7 @@ impl Parser {
             ));
         }
 
+        self.current_class = self.current_token().token_str.as_ref().unwrap().to_string();
         class_parse_tree.push_str(&self.generate_xml_tag());
 
         self.index += 1;
@@ -302,6 +305,16 @@ impl Parser {
         }
 
         self.subroutine_symbol_table.clear_table();
+
+        // Methods operate on the current object and to do so in VM code, the
+        // first argument to a method must be the object itself (this).
+        if self.current_token().token == Token::Method {
+            self.subroutine_symbol_table.define(
+                String::from("this"),
+                self.current_class.clone(),
+                Kind::Arg,
+            );
+        }
 
         let mut subroutine_parse_tree = self.generate_indent();
 
