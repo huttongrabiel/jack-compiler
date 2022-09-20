@@ -611,14 +611,14 @@ impl Parser {
         self.subroutine_symbol_table.define(
             self.current_token().token_str.as_ref().unwrap().to_string(),
             ty.clone(),
-            Kind::Local,
+            Kind::Var,
         );
 
         var_dec_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
         // This function only parses local variables.
-        var_dec_parse_tree.push_str(&self.parse_multi_variable_declaration(ty, Kind::Local)?);
+        var_dec_parse_tree.push_str(&self.parse_multi_variable_declaration(ty, Kind::Var)?);
 
         if self.tokens[self.index].token != Token::Semicolon {
             return Err(JackError::new(
@@ -669,7 +669,7 @@ impl Parser {
                 self.index += 1;
 
                 // Pick the right symbol table depending on the kind.
-                if matches!(kind, Kind::Local | Kind::Arg) {
+                if matches!(kind, Kind::Var | Kind::Arg) {
                     self.subroutine_symbol_table.define(
                         self.current_token().token_str.as_ref().unwrap().to_string(),
                         ty.clone(),

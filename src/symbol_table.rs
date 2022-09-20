@@ -5,7 +5,7 @@ pub enum Kind {
     Static,
     Field,
     Arg,
-    Local,
+    Var,
 }
 
 impl Display for Kind {
@@ -14,7 +14,7 @@ impl Display for Kind {
             Kind::Static => write!(f, "static"),
             Kind::Field => write!(f, "field"),
             Kind::Arg => write!(f, "argument"),
-            Kind::Local => write!(f, "local"),
+            Kind::Var => write!(f, "local"),
         }
     }
 }
@@ -84,7 +84,7 @@ impl SymbolTable {
             Kind::Static => self.static_index,
             Kind::Arg => self.field_index,
             Kind::Field => self.arg_index,
-            Kind::Local => self.local_index,
+            Kind::Var => self.local_index,
         };
 
         let symbol = Symbol::new(name, ty, kind, index);
@@ -98,7 +98,7 @@ impl SymbolTable {
             Kind::Static => self.static_index += 1,
             Kind::Arg => self.field_index += 1,
             Kind::Field => self.arg_index += 1,
-            Kind::Local => self.local_index += 1,
+            Kind::Var => self.local_index += 1,
         }
     }
 
