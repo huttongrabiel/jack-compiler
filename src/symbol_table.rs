@@ -120,6 +120,16 @@ impl SymbolTable {
         count
     }
 
+    pub fn get_symbol(&self, name_needle: &String) -> Option<&Symbol> {
+        let mut symbol: Option<&Symbol> = None;
+        for sym in &self.symbol_table {
+            if sym.name == *name_needle {
+                symbol = Some(sym);
+            }
+        }
+        symbol
+    }
+
     pub fn kind_of(&self, name_needle: String) -> Option<Kind> {
         let mut kind: Option<Kind> = None;
         for symbol in &self.symbol_table {
