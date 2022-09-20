@@ -3,13 +3,13 @@ use std::fmt::Write;
 
 pub fn gen_push(segment: Segment, index: u32) -> String {
     let mut push = String::from("push ");
-    writeln!(push, "{:?} {}", segment, index);
+    writeln!(push, "{:?} {}", segment, index).unwrap();
     push
 }
 
 pub fn gen_pop(segment: Segment, index: u32) -> String {
     let mut pop = String::from("pop ");
-    writeln!(pop, "{:?} {}", segment, index);
+    writeln!(pop, "{:?} {}", segment, index).unwrap();
     pop
 }
 
