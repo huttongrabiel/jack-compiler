@@ -202,8 +202,6 @@ impl Parser {
             return Ok(String::new());
         }
 
-        let mut var_dec_vm_code = String::new();
-
         let mut cvd_parse_tree = self.generate_indent();
         writeln!(cvd_parse_tree, "<{:?}>", ParseTag::ClassVarDec)
             .expect("Failed to write cvd_parse_tree.");
@@ -215,14 +213,11 @@ impl Parser {
                 || self.current_token().token == Token::Static
         );
 
-        let mut kind: Kind;
-        let mut segment: Segment;
+        let kind: Kind;
         if self.current_token().token == Token::Field {
             kind = Kind::Field;
-            segment = Segment::Local;
         } else {
             kind = Kind::Static;
-            segment = Segment::Static;
         }
 
         cvd_parse_tree.push_str(&self.generate_xml_tag());
