@@ -768,6 +768,7 @@ impl Parser {
 
     fn parse_let(&mut self) -> Result<String, JackError> {
         let mut let_parse_tree = self.generate_indent();
+        let mut let_vm_code = String::new();
 
         writeln!(let_parse_tree, "<{:?}>", ParseTag::LetStatement)
             .expect("Failed to write <LetStatement>.");
@@ -796,7 +797,7 @@ impl Parser {
             let_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
 
-            let_parse_tree.push_str(&self.parse_expression()?);
+            let_vm_code.push_str(&self.parse_expression()?);
 
             if self.tokens[self.index].token != Token::CloseBracket {
                 return Err(JackError::new(
@@ -825,7 +826,7 @@ impl Parser {
         let_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        let_parse_tree.push_str(&self.parse_expression()?);
+        let_vm_code.push_str(&self.parse_expression()?);
 
         if self.tokens[self.index].token != Token::Semicolon {
             return Err(JackError::new(
@@ -845,7 +846,7 @@ impl Parser {
         writeln!(let_parse_tree, "</{:?}>", ParseTag::LetStatement)
             .expect("Failed to write </LetStatement>.");
 
-        Ok(let_parse_tree)
+        Ok(let_vm_code)
     }
 
     fn parse_while(&mut self) -> Result<String, JackError> {
