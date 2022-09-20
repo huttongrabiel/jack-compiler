@@ -129,6 +129,18 @@ impl TokenData {
             column,
         }
     }
+
+    pub fn ty(&self) -> String {
+        let ty: String;
+
+        if self.token == Token::Identifier {
+            ty = self.token_str.as_ref().unwrap().to_string();
+        } else {
+            ty = format!("{:?}", self.token);
+        }
+
+        ty
+    }
 }
 
 #[derive(Debug)]
