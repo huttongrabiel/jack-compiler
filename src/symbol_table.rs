@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use crate::parser::Segment;
+
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum Kind {
     Static,
@@ -15,6 +17,17 @@ impl Display for Kind {
             Kind::Field => write!(f, "field"),
             Kind::Arg => write!(f, "argument"),
             Kind::Var => write!(f, "local"),
+        }
+    }
+}
+
+impl Kind {
+    pub fn as_segment(&self) -> Segment {
+        match self {
+            Kind::Static => Segment::Static,
+            Kind::Field => Segment::This,
+            Kind::Arg => Segment::Arg,
+            Kind::Var => Segment::Local,
         }
     }
 }
