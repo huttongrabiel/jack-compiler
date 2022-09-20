@@ -21,10 +21,10 @@ impl Display for Kind {
 
 #[derive(Debug)]
 pub struct Symbol {
-    name: String,
-    ty: String,
-    kind: Kind,
-    index: u32,
+    pub name: String,
+    pub ty: String,
+    pub kind: Kind,
+    pub index: u32,
 }
 
 impl Symbol {
