@@ -71,7 +71,10 @@ impl SymbolTable {
         };
 
         let symbol = Symbol::new(name, ty, kind, index);
+
+        // TODO: Remove this debug print
         eprintln!("{}", symbol);
+
         self.symbol_table.push(symbol);
 
         match kind {
