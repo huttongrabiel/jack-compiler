@@ -1111,17 +1111,25 @@ impl Parser {
 
     fn parse_expression(&mut self) -> Result<String, JackError> {
         let mut expression_parse_tree = self.generate_indent();
+        let mut expression_vm_code = String::new();
 
         writeln!(expression_parse_tree, "<{:?}>", ParseTag::Expression)
             .expect("Failed to write <Expression>.");
         self.indent_amount += 2;
 
-        expression_parse_tree.push_str(&self.parse_term()?);
+        expression_vm_code.push_str(&self.parse_term()?);
 
         while self.current_token().token.is_op() {
+            // Store the index or the operator before the index is modified in
+            // parse_term.
+            let op_index = self.index;
+
             expression_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
-            expression_parse_tree.push_str(&self.parse_term()?);
+            expression_vm_code.push_str(&self.parse_term()?);
+
+            let op = &self.tokens[op_index].token;
+            expression_vm_code.push_str(&codegen::gen_arithmetic(op));
         }
 
         self.indent_amount -= 2;
@@ -1129,7 +1137,7 @@ impl Parser {
         writeln!(expression_parse_tree, "</{:?}>", ParseTag::Expression)
             .expect("Failed to write </Expression>.");
 
-        Ok(expression_parse_tree)
+        Ok(expression_vm_code)
     }
 
     fn parse_term(&mut self) -> Result<String, JackError> {
