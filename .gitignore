@@ -3,3 +3,4 @@ Cargo.lock
 *.jack
 testjack/
 *.xml
+*.vm
