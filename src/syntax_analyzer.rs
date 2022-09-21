@@ -101,13 +101,13 @@ fn generate_xml(jack_files: &Vec<String>) -> Result<String, JackError> {
         if DEBUG {
             eprintln!(
                 "Built path: {}",
-                &format!("{}/{}.xml", ppath, file_name.trim_end_matches(".jack"),)
+                &format!("{}/{}.vm", ppath, file_name.trim_end_matches(".jack"),)
             )
         }
 
         fs::write(
             std::path::Path::new(&format!(
-                "{}/{}.xml",
+                "{}/{}.vm",
                 ppath,
                 file_name.trim_end_matches(".jack")
             )),
