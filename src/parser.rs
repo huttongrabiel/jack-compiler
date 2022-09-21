@@ -152,6 +152,7 @@ impl Parser {
     fn parse_class(&mut self) -> Result<String, JackError> {
         // Output string for XML parse tree.
         let mut class_parse_tree = String::from("<class>\n");
+        let mut class_vm_code = String::new();
 
         self.indent_amount += 2;
         class_parse_tree.push_str(&self.generate_xml_tag());
@@ -188,8 +189,8 @@ impl Parser {
         // Move to the first token of the body of the class.
         self.index += 1;
 
-        class_parse_tree.push_str(&self.parse_class_var_dec()?);
-        class_parse_tree.push_str(&self.parse_subroutine()?);
+        class_vm_code.push_str(&self.parse_class_var_dec()?);
+        class_vm_code.push_str(&self.parse_subroutine()?);
 
         // We should only return to this point once we have reached the end of
         // the class.
@@ -205,7 +206,7 @@ impl Parser {
 
         class_parse_tree.push_str("</class>");
 
-        Ok(class_parse_tree)
+        Ok(class_vm_code)
     }
 
     fn parse_class_var_dec(&mut self) -> Result<String, JackError> {
@@ -215,6 +216,7 @@ impl Parser {
             return Ok(String::new());
         }
 
+        let mut cvd_vm_code = String::new();
         let mut cvd_parse_tree = self.generate_indent();
         writeln!(cvd_parse_tree, "<{:?}>", ParseTag::ClassVarDec)
             .expect("Failed to write cvd_parse_tree.");
@@ -274,7 +276,7 @@ impl Parser {
         cvd_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        cvd_parse_tree.push_str(&self.parse_multi_variable_declaration(ty, kind)?);
+        cvd_vm_code.push_str(&self.parse_multi_variable_declaration(ty, kind)?);
 
         if self.tokens[self.index].token != Token::Semicolon {
             return Err(JackError::new(
@@ -299,10 +301,10 @@ impl Parser {
         if self.tokens[self.index].token == Token::Static
             || self.tokens[self.index].token == Token::Field
         {
-            cvd_parse_tree.push_str(&self.parse_class_var_dec()?);
+            cvd_vm_code.push_str(&self.parse_class_var_dec()?);
         }
 
-        Ok(cvd_parse_tree)
+        Ok(cvd_vm_code)
     }
 
     // Subroutine can be a method, function, or constructor
@@ -1157,6 +1159,7 @@ impl Parser {
 
     fn parse_term(&mut self) -> Result<String, JackError> {
         let mut term_parse_tree = self.generate_indent();
+        let mut term_vm_code = String::new();
 
         writeln!(term_parse_tree, "<{:?}>", ParseTag::Term).expect("Failed to write <Term>.");
         self.indent_amount += 2;
@@ -1234,13 +1237,14 @@ impl Parser {
         term_parse_tree.push_str(&self.generate_indent());
         writeln!(term_parse_tree, "</{:?}>", ParseTag::Term).expect("Failed to write </Term>.");
 
-        Ok(term_parse_tree)
+        Ok(term_vm_code)
     }
 
     // Expression lists are lists of expressions separated by commas. They CAN
     // be empty.
     fn parse_expression_list(&mut self) -> Result<String, JackError> {
         let mut expression_list_parse_tree = self.generate_indent();
+        let mut expression_list_vm_code = String::new();
 
         writeln!(
             expression_list_parse_tree,
@@ -1251,7 +1255,7 @@ impl Parser {
         self.indent_amount += 2;
 
         if self.current_token().token != Token::CloseParen {
-            expression_list_parse_tree.push_str(&self.parse_expression()?);
+            expression_list_vm_code.push_str(&self.parse_expression()?);
         }
 
         while self.current_token().token == Token::Comma {
@@ -1260,7 +1264,7 @@ impl Parser {
             expression_list_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
 
-            expression_list_parse_tree.push_str(&self.parse_expression()?);
+            expression_list_vm_code.push_str(&self.parse_expression()?);
         }
 
         self.indent_amount -= 2;
@@ -1272,13 +1276,14 @@ impl Parser {
         )
         .expect("Failed to write </ExpressionList>.");
 
-        Ok(expression_list_parse_tree)
+        Ok(expression_list_vm_code)
     }
 
     fn parse_subroutine_call(&mut self) -> Result<String, JackError> {
         // Add the identifier to the parse tree. If we call this function we are
         // guaranteed to be on an identifier.
         let mut subroutine_call_parse_tree = self.generate_xml_tag();
+        let mut subroutine_call_vm_code = String::new();
 
         self.index += 1;
 
@@ -1314,7 +1319,7 @@ impl Parser {
         subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        subroutine_call_parse_tree.push_str(&self.parse_expression_list()?);
+        subroutine_call_vm_code.push_str(&self.parse_expression_list()?);
 
         if self.current_token().token != Token::CloseParen {
             return Err(JackError::new(
@@ -1329,7 +1334,7 @@ impl Parser {
         subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        Ok(subroutine_call_parse_tree)
+        Ok(subroutine_call_vm_code)
     }
 
     fn generate_xml_tag(&self) -> String {
