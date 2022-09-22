@@ -1044,6 +1044,10 @@ impl Parser {
             ));
         }
 
+        if self.current_function.is_void {
+            return_vm_code.push_str("push constant 0\n");
+        }
+
         // The above call to parse_expression should put the return value
         // on the stack at which point we then just have to call return.
         return_vm_code.push_str("return\n");
