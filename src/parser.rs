@@ -484,6 +484,7 @@ impl Parser {
             return Ok(empty_parameter_list);
         }
 
+        let parameter_list_vm_code = String::new();
         let mut parameter_list_parse_tree = self.generate_indent();
         writeln!(parameter_list_parse_tree, "<{:?}>", ParseTag::ParameterList)
             .expect("Failed to write <ParameterList>.");
@@ -567,7 +568,7 @@ impl Parser {
         )
         .expect("Failed to write </ParameterList>.");
 
-        Ok(parameter_list_parse_tree)
+        Ok(parameter_list_vm_code)
     }
 
     fn parse_var_dec(&mut self) -> Result<String, JackError> {
@@ -576,6 +577,7 @@ impl Parser {
             return Ok(String::new());
         }
 
+        let var_dec_vm_code = String::new();
         let mut var_dec_parse_tree = self.generate_indent();
         writeln!(var_dec_parse_tree, "<{:?}>", ParseTag::VarDec)
             .expect("Failed to write <VarDec>.");
@@ -645,7 +647,7 @@ impl Parser {
             var_dec_parse_tree.push_str(&self.parse_var_dec()?);
         }
 
-        Ok(var_dec_parse_tree)
+        Ok(var_dec_vm_code)
     }
 
     /// Multi variable declarations are variable declarations that happen on a single line.
@@ -662,6 +664,7 @@ impl Parser {
         kind: Kind,
     ) -> Result<String, JackError> {
         let mut multi_variable_declaration_parse_tree = String::new();
+        let multi_variable_declaration_vm_code = String::new();
 
         while self.tokens[self.index].token != Token::Semicolon {
             if self.tokens[self.index].token == Token::Comma
@@ -698,7 +701,7 @@ impl Parser {
             self.index += 1;
         }
 
-        Ok(multi_variable_declaration_parse_tree)
+        Ok(multi_variable_declaration_vm_code)
     }
 
     fn parse_statements(&mut self) -> Result<String, JackError> {
@@ -751,6 +754,7 @@ impl Parser {
 
     fn parse_do(&mut self) -> Result<String, JackError> {
         let mut do_parse_tree = self.generate_indent();
+        let do_vm_code = String::new();
 
         writeln!(do_parse_tree, "<{:?}>", ParseTag::DoStatement)
             .expect("Failed to write <DoStatement>.");
@@ -780,7 +784,7 @@ impl Parser {
         writeln!(do_parse_tree, "</{:?}>", ParseTag::DoStatement)
             .expect("Failed to write </DoStatement>.");
 
-        Ok(do_parse_tree)
+        Ok(do_vm_code)
     }
 
     fn parse_let(&mut self) -> Result<String, JackError> {
@@ -1009,6 +1013,7 @@ impl Parser {
 
     fn parse_if(&mut self) -> Result<String, JackError> {
         let mut if_parse_tree = self.generate_indent();
+        let if_vm_code = String::new();
 
         writeln!(if_parse_tree, "<{:?}>", ParseTag::IfStatement)
             .expect("Failed to write <IfStatement>.");
@@ -1123,7 +1128,7 @@ impl Parser {
         writeln!(if_parse_tree, "</{:?}>", ParseTag::IfStatement)
             .expect("Failed to write </IfStatement>.");
 
-        Ok(if_parse_tree)
+        Ok(if_vm_code)
     }
 
     fn parse_expression(&mut self) -> Result<String, JackError> {
