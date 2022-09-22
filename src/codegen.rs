@@ -25,7 +25,11 @@ pub fn gen_arithmetic(command: &Token) -> String {
         Token::Ampersand => "and\n",
         Token::Pipe => "or\n",
         Token::Tilde => "not\n",
-        _ => panic!("Non-arithmetic token given to gen_arithmetic."),
+        Token::Asterik => "call Math.multiply 2\n",
+        _ => {
+            eprintln!("Token: {:?}", command);
+            panic!("Non-arithmetic token given to gen_arithmetic.")
+        }
     };
 
     arithmetic_op.to_string()
