@@ -26,6 +26,7 @@ pub fn gen_arithmetic(command: &Token) -> String {
         Token::Pipe => "or\n",
         Token::Tilde => "not\n",
         Token::Asterik => "call Math.multiply 2\n",
+        Token::BackSlash => "call Math.divide 2\n",
         _ => {
             eprintln!("Token: {:?}", command);
             panic!("Non-arithmetic token given to gen_arithmetic.")
