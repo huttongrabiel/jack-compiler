@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+cd ${DIR}
+
 GREEN='\033[0;32m'
 NC='\033[0m'
 
