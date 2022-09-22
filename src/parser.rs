@@ -329,6 +329,9 @@ impl Parser {
 
         let mut subroutine_parse_tree = self.generate_indent();
         let mut subroutine_vm_code = String::new();
+        // All subroutines are called with function in VM code, regardless of
+        // whether they are a function, method, or constructor.
+        let mut subroutine_name = String::from("function ");
 
         // Parse start of SubroutineDec.
         writeln!(subroutine_parse_tree, "<{:?}>", ParseTag::SubroutineDec)
@@ -365,6 +368,14 @@ impl Parser {
             ));
         }
 
+        write!(
+            subroutine_name,
+            "{}.{}",
+            self.current_class,
+            &self.current_token().token_str.as_ref().unwrap()
+        )
+        .unwrap();
+
         subroutine_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
@@ -382,7 +393,12 @@ impl Parser {
         self.index += 1;
 
         // Parse ParameterList.
-        subroutine_parse_tree.push_str(&self.parse_parameter_list()?);
+        let (parameter_list_vm_code, parameter_count) = self.parse_parameter_list()?;
+        writeln!(subroutine_name, " {}", parameter_count.to_string()).unwrap();
+
+        subroutine_vm_code.push_str(&subroutine_name);
+
+        subroutine_parse_tree.push_str(&parameter_list_vm_code);
 
         if self.tokens[self.index].token != Token::CloseParen {
             return Err(JackError::new(
@@ -473,7 +489,7 @@ impl Parser {
         Ok(subroutine_vm_code)
     }
 
-    fn parse_parameter_list(&mut self) -> Result<String, JackError> {
+    fn parse_parameter_list(&mut self) -> Result<(String, u32), JackError> {
         if self.tokens[self.index].token == Token::CloseParen {
             let mut empty_parameter_list = self.generate_indent();
             writeln!(empty_parameter_list, "<{:?}>", ParseTag::ParameterList)
@@ -481,7 +497,7 @@ impl Parser {
             empty_parameter_list.push_str(&self.generate_indent());
             writeln!(empty_parameter_list, "</{:?}>", ParseTag::ParameterList)
                 .expect("Failed to write </ParameterList>.");
-            return Ok(empty_parameter_list);
+            return Ok((empty_parameter_list, 0));
         }
 
         let parameter_list_vm_code = String::new();
@@ -525,6 +541,8 @@ impl Parser {
         parameter_list_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
+        let mut parameter_count = 1;
+
         // Handle parameter lists that have multiple parameters.
         while self.tokens[self.index].token != Token::CloseParen {
             if self.tokens[self.index].token == Token::Comma
@@ -555,6 +573,7 @@ impl Parser {
                     Some(self.tokens[self.index].column),
                 ));
             }
+            parameter_count += 1;
             self.index += 1;
         }
 
@@ -568,7 +587,7 @@ impl Parser {
         )
         .expect("Failed to write </ParameterList>.");
 
-        Ok(parameter_list_vm_code)
+        Ok((parameter_list_vm_code, parameter_count))
     }
 
     fn parse_var_dec(&mut self) -> Result<String, JackError> {
@@ -1372,7 +1391,6 @@ impl Parser {
         }
 
         writeln!(subroutine_name, " {}", &arg_count.to_string()).unwrap();
-
         subroutine_call_vm_code.push_str(&subroutine_name);
 
         subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
