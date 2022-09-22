@@ -85,11 +85,36 @@ pub enum ParseTag {
     KeywordConstant,
 }
 
+pub struct Function {
+    pub name: String,
+    pub return_type: Token,
+    pub arg_count: u32,
+}
+
+impl Function {
+    pub fn new(name: String, return_type: Token, arg_count: u32) -> Self {
+        Self {
+            name,
+            return_type,
+            arg_count,
+        }
+    }
+
+    pub fn blank_new() -> Self {
+        Self {
+            name: String::new(),
+            return_type: Token::Void,
+            arg_count: 0,
+        }
+    }
+}
+
 pub struct Parser {
     tokens: Vec<TokenData>,
     index: usize,
     indent_amount: usize,
     current_class: String,
+    current_function: Function,
     pub class_symbol_table: SymbolTable,
     subroutine_symbol_table: SymbolTable,
 }
@@ -101,6 +126,7 @@ impl Parser {
             index: 0,
             indent_amount: 0,
             current_class: String::new(),
+            current_function: Function::blank_new(),
             class_symbol_table: SymbolTable::new(),
             subroutine_symbol_table: SymbolTable::new(),
         }
