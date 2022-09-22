@@ -754,7 +754,7 @@ impl Parser {
 
     fn parse_do(&mut self) -> Result<String, JackError> {
         let mut do_parse_tree = self.generate_indent();
-        let do_vm_code = String::new();
+        let mut do_vm_code = String::new();
 
         writeln!(do_parse_tree, "<{:?}>", ParseTag::DoStatement)
             .expect("Failed to write <DoStatement>.");
@@ -764,7 +764,7 @@ impl Parser {
         do_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        do_parse_tree.push_str(&self.parse_subroutine_call()?);
+        do_vm_code.push_str(&self.parse_subroutine_call()?);
 
         if self.current_token().token != Token::Semicolon {
             return Err(JackError::new(
@@ -1179,9 +1179,10 @@ impl Parser {
         {
             term_parse_tree.push_str(&self.generate_xml_tag());
             // token_str should always be Some.
+            // FIXME: This should not always be the constant segment.
             writeln!(
                 term_vm_code,
-                "push {}",
+                "push constant {}",
                 self.current_token().token_str.as_ref().unwrap()
             )
             .unwrap();
@@ -1313,10 +1314,15 @@ impl Parser {
         let mut subroutine_call_parse_tree = self.generate_xml_tag();
         let mut subroutine_call_vm_code = String::new();
 
+        let mut subroutine_name = String::from("call ");
+        subroutine_name.push_str(self.current_token().token_str.as_ref().unwrap());
+
         self.index += 1;
 
         // Will only occur if subroutine is a method of a class.
         if self.current_token().token == Token::Dot {
+            subroutine_name.push_str(".");
+
             subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
 
@@ -1329,6 +1335,8 @@ impl Parser {
                     Some(self.current_token().column),
                 ));
             }
+
+            subroutine_name.push_str(self.current_token().token_str.as_ref().unwrap());
 
             subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
@@ -1358,6 +1366,12 @@ impl Parser {
                 Some(self.current_token().column),
             ));
         }
+
+        // FIXME: Add number of arguments to end of subroutine name. Subroutines
+        // are called with the number of arguments so that they know how many
+        // values to pull off the stack.
+        subroutine_call_vm_code.push_str(&subroutine_name);
+        subroutine_call_vm_code.push_str("\n");
 
         subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
