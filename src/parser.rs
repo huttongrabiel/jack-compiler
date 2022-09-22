@@ -1178,6 +1178,13 @@ impl Parser {
         ) || self.current_token().token.is_keyword_constant()
         {
             term_parse_tree.push_str(&self.generate_xml_tag());
+            // token_str should always be Some.
+            writeln!(
+                term_vm_code,
+                "push {}",
+                self.current_token().token_str.as_ref().unwrap()
+            )
+            .unwrap();
             self.index += 1;
         } else if self.current_token().token == Token::Identifier {
             let next = &self.peek().token;
@@ -1192,7 +1199,7 @@ impl Parser {
                 self.index += 1;
                 // Go parse the expression. Should return us back to the Close
                 // Bracket.
-                term_parse_tree.push_str(&self.parse_expression()?);
+                term_vm_code.push_str(&self.parse_expression()?);
 
                 if self.current_token().token != Token::CloseBracket {
                     return Err(JackError::new(
@@ -1208,17 +1215,33 @@ impl Parser {
                 self.index += 1;
             // identifer.identifier(...) || identifier(...)
             } else if *next == Token::Dot || *next == Token::OpenParen {
-                term_parse_tree.push_str(&self.parse_subroutine_call()?);
+                term_vm_code.push_str(&self.parse_subroutine_call()?);
             // identifier
             } else {
                 term_parse_tree.push_str(&self.generate_xml_tag());
+                let name = self.current_token().token_str.as_ref().unwrap().to_string();
+                let symbol: &Symbol =
+                    if let Some(sym) = self.subroutine_symbol_table.get_symbol(&name) {
+                        sym
+                    } else if let Some(sym) = self.class_symbol_table.get_symbol(&name) {
+                        sym
+                    } else {
+                        return Err(JackError::new(
+                            ErrorType::UndeclaredVariable,
+                            "Undeclared variable encountered.",
+                            Some(self.tokens[self.index].path.clone()),
+                            Some(self.tokens[self.index].line),
+                            Some(self.tokens[self.index].column),
+                        ));
+                    };
+                term_vm_code.push_str(&codegen::gen_push(symbol.kind.as_segment(), symbol.index));
                 self.index += 1;
             }
         } else if self.current_token().token == Token::OpenParen {
             term_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
 
-            term_parse_tree.push_str(&self.parse_expression()?);
+            term_vm_code.push_str(&self.parse_expression()?);
 
             if self.current_token().token != Token::CloseParen {
                 return Err(JackError::new(
@@ -1235,7 +1258,7 @@ impl Parser {
         } else if matches!(self.current_token().token, Token::Minus | Token::Tilde) {
             term_parse_tree.push_str(&self.generate_xml_tag());
             self.index += 1;
-            term_parse_tree.push_str(&self.parse_term()?);
+            term_vm_code.push_str(&self.parse_term()?);
         }
 
         self.indent_amount -= 2;
