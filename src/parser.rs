@@ -87,15 +87,15 @@ pub enum ParseTag {
 
 pub struct Function {
     pub name: String,
-    pub return_type: Token,
+    pub is_void: bool,
     pub arg_count: u32,
 }
 
 impl Function {
-    pub fn new(name: String, return_type: Token, arg_count: u32) -> Self {
+    pub fn new(name: String, is_void: bool, arg_count: u32) -> Self {
         Self {
             name,
-            return_type,
+            is_void,
             arg_count,
         }
     }
@@ -103,7 +103,7 @@ impl Function {
     pub fn blank_new() -> Self {
         Self {
             name: String::new(),
-            return_type: Token::Void,
+            is_void: true,
             arg_count: 0,
         }
     }
@@ -380,7 +380,9 @@ impl Parser {
             }
         }
 
-        self.current_function.return_type = self.current_token().token.clone();
+        if self.current_token().token == Token::Void {
+            self.current_function.is_void = true;
+        }
 
         subroutine_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
