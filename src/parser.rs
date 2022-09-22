@@ -1271,7 +1271,7 @@ impl Parser {
 
     // Expression lists are lists of expressions separated by commas. They CAN
     // be empty.
-    fn parse_expression_list(&mut self) -> Result<String, JackError> {
+    fn parse_expression_list(&mut self) -> Result<(String, u32), JackError> {
         let mut expression_list_parse_tree = self.generate_indent();
         let mut expression_list_vm_code = String::new();
 
@@ -1287,6 +1287,8 @@ impl Parser {
             expression_list_vm_code.push_str(&self.parse_expression()?);
         }
 
+        let mut expression_count = 1;
+
         while self.current_token().token == Token::Comma {
             // Add the comma to the parse tree and advance to start of
             // expression.
@@ -1294,6 +1296,7 @@ impl Parser {
             self.index += 1;
 
             expression_list_vm_code.push_str(&self.parse_expression()?);
+            expression_count += 1;
         }
 
         self.indent_amount -= 2;
@@ -1305,7 +1308,7 @@ impl Parser {
         )
         .expect("Failed to write </ExpressionList>.");
 
-        Ok(expression_list_vm_code)
+        Ok((expression_list_vm_code, expression_count))
     }
 
     fn parse_subroutine_call(&mut self) -> Result<String, JackError> {
@@ -1355,7 +1358,8 @@ impl Parser {
         subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
-        subroutine_call_vm_code.push_str(&self.parse_expression_list()?);
+        let (expression_list_vm_code, arg_count) = self.parse_expression_list()?;
+        subroutine_call_vm_code.push_str(&expression_list_vm_code);
 
         if self.current_token().token != Token::CloseParen {
             return Err(JackError::new(
@@ -1367,11 +1371,9 @@ impl Parser {
             ));
         }
 
-        // FIXME: Add number of arguments to end of subroutine name. Subroutines
-        // are called with the number of arguments so that they know how many
-        // values to pull off the stack.
+        writeln!(subroutine_name, " {}", &arg_count.to_string()).unwrap();
+
         subroutine_call_vm_code.push_str(&subroutine_name);
-        subroutine_call_vm_code.push_str("\n");
 
         subroutine_call_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
