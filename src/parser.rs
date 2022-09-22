@@ -354,10 +354,9 @@ impl Parser {
         }
 
         let mut subroutine_parse_tree = self.generate_indent();
-        let mut subroutine_vm_code = String::new();
+        let mut subroutine_vm_code = String::from("function ");
         // All subroutines are called with function in VM code, regardless of
         // whether they are a function, method, or constructor.
-        let mut subroutine_name = String::from("function ");
 
         // Parse start of SubroutineDec.
         writeln!(subroutine_parse_tree, "<{:?}>", ParseTag::SubroutineDec)
@@ -381,6 +380,8 @@ impl Parser {
             }
         }
 
+        self.current_function.return_type = self.current_token().token.clone();
+
         subroutine_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
 
@@ -394,13 +395,14 @@ impl Parser {
             ));
         }
 
-        write!(
-            subroutine_name,
+        let subroutine_name = format!(
             "{}.{}",
             self.current_class,
             &self.current_token().token_str.as_ref().unwrap()
-        )
-        .unwrap();
+        );
+        subroutine_vm_code.push_str(&subroutine_name);
+
+        self.current_function.name = subroutine_name.clone();
 
         subroutine_parse_tree.push_str(&self.generate_xml_tag());
         self.index += 1;
@@ -420,9 +422,8 @@ impl Parser {
 
         // Parse ParameterList.
         let (parameter_list_vm_code, parameter_count) = self.parse_parameter_list()?;
-        writeln!(subroutine_name, " {}", parameter_count.to_string()).unwrap();
-
-        subroutine_vm_code.push_str(&subroutine_name);
+        self.current_function.arg_count = parameter_count;
+        writeln!(subroutine_vm_code, " {}", parameter_count.to_string()).unwrap();
 
         subroutine_parse_tree.push_str(&parameter_list_vm_code);
 
