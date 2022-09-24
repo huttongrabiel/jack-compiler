@@ -1224,10 +1224,8 @@ impl Parser {
         // We should be on the first Token of the term by the time we get to
         // this point of parsing a term.
 
-        if matches!(
-            self.current_token().token,
-            Token::IntegerConstant | Token::StringConstant
-        ) || self.current_token().token.is_keyword_constant()
+        if self.current_token().token == Token::IntegerConstant
+            || self.current_token().token.is_keyword_constant()
         {
             term_parse_tree.push_str(&self.generate_xml_tag());
             // token_str should always be Some.
@@ -1238,6 +1236,24 @@ impl Parser {
                 self.current_token().token_str.as_ref().unwrap()
             )
             .unwrap();
+            self.index += 1;
+        } else if self.current_token().token == Token::StringConstant {
+            let string_contents = &self.current_token().token_str.as_ref().unwrap();
+            let mut string_vm_code = String::new();
+
+            string_vm_code.push_str(&codegen::gen_push(
+                Segment::Const,
+                string_contents.len() as u32,
+            ));
+            string_vm_code.push_str("call String.new 1\n");
+
+            for ch in string_contents.chars() {
+                let ascii_val = ch as u8;
+                string_vm_code.push_str(&codegen::gen_push(Segment::Const, ascii_val.into()));
+                string_vm_code.push_str("call String.appendChar 2\n");
+            }
+
+            term_vm_code.push_str(&string_vm_code);
             self.index += 1;
         } else if self.current_token().token == Token::Identifier {
             let next = &self.peek().token;
