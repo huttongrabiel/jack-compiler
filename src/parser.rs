@@ -1141,7 +1141,7 @@ impl Parser {
             if_parse_tree.push_str(&self.generate_indent());
             writeln!(if_parse_tree, "</{:?}>", ParseTag::IfStatement)
                 .expect("Failed to write </IfStatement>.");
-            return Ok(if_parse_tree);
+            return Ok(if_vm_code);
         }
 
         if_parse_tree.push_str(&self.generate_xml_tag());
