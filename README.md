@@ -1,5 +1,8 @@
 # Jack Compiler
 
+*Update: I got bored of writing out the byte code for this, check out the xml_generation branch to see the AST this generates.
+Small parts of the compiler work but most don't. See the tests for code that can be compiled.*
+
 Compiler for the Jack Lanaguage from [Nand2Tetris](https://www.nand2tetris.org/).
 
 The Jack compiler is almost always an LL(1) compiler except for in a few rare
