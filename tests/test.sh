@@ -14,7 +14,7 @@ pass_count=0
 # Test 1, ~misc/nand2tetris/projects/11/Seven/Main.jack
 file1="./SevenMain.vm"
 
-cargo run ~/misc/nand2tetris/projects/11/Seven/Main.jack
+cargo -q run ~/misc/nand2tetris/projects/11/Seven/Main.jack
 mv ./Main.vm ./SevenMainGen.vm
 file2="./SevenMainGen.vm"
 
